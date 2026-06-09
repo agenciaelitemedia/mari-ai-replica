@@ -10,6 +10,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { useState } from 'react';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 interface PlansListProps {
   plans: Plan[];
@@ -19,6 +21,14 @@ interface PlansListProps {
 }
 
 export function PlansList({ plans, onEdit, onDelete, isDeleting }: PlansListProps) {
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  const handleDeleteConfirm = () => {
+    if (deleteId) {
+      onDelete(deleteId);
+      setDeleteId(null);
+    }
+  };
   return (
     <div className="rounded-md border">
       <Table>
@@ -101,11 +111,7 @@ export function PlansList({ plans, onEdit, onDelete, isDeleting }: PlansListProp
                       variant="ghost"
                       size="icon"
                       disabled={isDeleting}
-                      onClick={() => {
-                        if (confirm('Tem certeza que deseja excluir este plano?')) {
-                          onDelete(plan.id);
-                        }
-                      }}
+                      onClick={() => setDeleteId(plan.id)}
                       className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -117,6 +123,17 @@ export function PlansList({ plans, onEdit, onDelete, isDeleting }: PlansListProp
           )}
         </TableBody>
       </Table>
+
+      <ConfirmDialog
+        open={!!deleteId}
+        onOpenChange={(open) => !open && setDeleteId(null)}
+        title="Excluir Plano"
+        description="Tem certeza que deseja excluir este plano? Esta ação não pode ser desfeita."
+        onConfirm={handleDeleteConfirm}
+        confirmText="Sim, Excluir"
+        cancelText="Não, Cancelar"
+        isLoading={isDeleting}
+      />
     </div>
   );
 }
