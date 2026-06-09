@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import { Plan, PlanFormData } from '@/hooks/usePlansAdmin';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -29,6 +31,21 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Loader2, ChevronRight, ChevronLeft, Check, Info, Settings, Puzzle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
+
+const planSchema = z.object({
+  name: z.string().min(1, 'O nome do plano é obrigatório'),
+  description: z.string(),
+  price: z.number().min(0, 'O preço deve ser maior ou igual a zero'),
+  price_quarterly: z.number().min(0),
+  price_semiannual: z.number().min(0),
+  price_annual: z.number().min(0),
+  is_active: z.boolean(),
+  module_ids: z.array(z.string()).min(1, 'Selecione pelo menos um módulo'),
+  settings: z.object({
+    queues_count: z.number().min(1, 'Mínimo de 1 fila'),
+  }).optional(),
+});
 
 interface PlanDialogProps {
   open: boolean;
@@ -50,6 +67,7 @@ export function PlanDialog({ open, onClose, plan, onSave, isLoading }: PlanDialo
   const [currentStep, setCurrentStep] = useState<Step>('basic');
   
   const form = useForm<PlanFormData>({
+    resolver: zodResolver(planSchema),
     defaultValues: {
       name: '',
       description: '',
@@ -115,10 +133,27 @@ export function PlanDialog({ open, onClose, plan, onSave, isLoading }: PlanDialo
   }, [plan, form, open]);
 
   const handleSubmit = (data: PlanFormData) => {
+    if (data.module_ids.length === 0) {
+      toast.error('Selecione pelo menos um módulo antes de finalizar.');
+      return;
+    }
     onSave(data);
   };
 
-  const nextStep = () => {
+  const nextStep = async () => {
+    let fieldsToValidate: any[] = [];
+    if (currentStep === 'basic') {
+      fieldsToValidate = ['name', 'price'];
+    } else if (currentStep === 'settings') {
+      fieldsToValidate = ['settings.queues_count'];
+    }
+
+    const isValid = await form.trigger(fieldsToValidate);
+    if (!isValid) {
+      toast.error('Por favor, preencha os campos obrigatórios corretamente.');
+      return;
+    }
+
     if (currentStep === 'basic') setCurrentStep('settings');
     else if (currentStep === 'settings') setCurrentStep('modules');
   };
@@ -129,11 +164,11 @@ export function PlanDialog({ open, onClose, plan, onSave, isLoading }: PlanDialo
   };
 
   const toggleModule = (moduleId: string) => {
-    const current = form.getValues('module_ids');
+    const current = form.getValues('module_ids') || [];
     if (current.includes(moduleId)) {
-      form.setValue('module_ids', current.filter(id => id !== moduleId));
+      form.setValue('module_ids', current.filter(id => id !== moduleId), { shouldValidate: true });
     } else {
-      form.setValue('module_ids', [...current, moduleId]);
+      form.setValue('module_ids', [...current, moduleId], { shouldValidate: true });
     }
   };
 
@@ -195,7 +230,15 @@ export function PlanDialog({ open, onClose, plan, onSave, isLoading }: PlanDialo
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="flex min-h-0 flex-col flex-1 overflow-hidden">
+          <form 
+            onSubmit={form.handleSubmit(handleSubmit)} 
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'TEXTAREA') {
+                e.preventDefault();
+              }
+            }}
+            className="flex min-h-0 flex-col flex-1 overflow-hidden"
+          >
             <ScrollArea className="min-h-0 flex-1 p-8">
               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 
@@ -366,6 +409,7 @@ export function PlanDialog({ open, onClose, plan, onSave, isLoading }: PlanDialo
                                 type="number"
                                 min={1}
                                 {...field}
+                                value={field.value || 1}
                                 onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
                                 className="h-14 rounded-2xl bg-card border-border/40 focus:ring-primary/20 font-black text-xl text-center"
                               />
