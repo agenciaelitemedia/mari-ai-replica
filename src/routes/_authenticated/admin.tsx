@@ -1,5 +1,6 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useRouterState } from '@tanstack/react-router';
 import { useAuth } from '@/contexts/AuthContext';
+import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,7 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2, Shield, User, Globe, Layers, Plus, Package } from 'lucide-react';
-import { useState } from 'react';
+
 import { toast } from 'sonner';
 import type { AppRole, Module } from '@/types/permissions';
 import { ModulesList } from '@/components/admin/modulos/ModulesList';
@@ -25,7 +26,18 @@ export const Route = createFileRoute('/_authenticated/admin')({
 
 function AdminPage() {
   const { isSuperAdmin } = useAuth();
-  const [activeTab, setActiveTab] = useState<'permissions' | 'modules' | 'plans' | 'clients'>('permissions');
+  const search = useRouterState({ select: (s) => s.location.search });
+  const [activeTab, setActiveTab] = useState<'permissions' | 'modules' | 'plans' | 'clients'>(
+    (search as any)?.tab || 'permissions'
+  );
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+    if (tab && ['permissions', 'modules', 'plans', 'clients'].includes(tab)) {
+      setActiveTab(tab as any);
+    }
+  }, [search]);
 
   return (
     <div className="p-6 md:p-12 space-y-10 max-w-7xl mx-auto animate-in fade-in duration-500">
