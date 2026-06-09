@@ -43,6 +43,9 @@ export function PlanDialog({ open, onClose, plan, onSave, isLoading }: PlanDialo
       name: '',
       description: '',
       price: 0,
+      price_quarterly: 0,
+      price_semiannual: 0,
+      price_annual: 0,
       is_active: true,
       module_ids: [],
     },
@@ -68,6 +71,9 @@ export function PlanDialog({ open, onClose, plan, onSave, isLoading }: PlanDialo
         name: plan.name,
         description: plan.description || '',
         price: Number(plan.price),
+        price_quarterly: Number(plan.price_quarterly || 0),
+        price_semiannual: Number(plan.price_semiannual || 0),
+        price_annual: Number(plan.price_annual || 0),
         is_active: plan.is_active,
         module_ids: plan.module_ids || [],
       });
@@ -76,6 +82,9 @@ export function PlanDialog({ open, onClose, plan, onSave, isLoading }: PlanDialo
         name: '',
         description: '',
         price: 0,
+        price_quarterly: 0,
+        price_semiannual: 0,
+        price_annual: 0,
         is_active: true,
         module_ids: [],
       });
@@ -139,6 +148,69 @@ export function PlanDialog({ open, onClose, plan, onSave, isLoading }: PlanDialo
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70">Preço Mensal (R$)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            placeholder="0.00"
+                            {...field}
+                            onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                            className="h-12 rounded-xl bg-muted/30 border-border/50 focus:ring-primary/20"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="price_quarterly"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70">Trimestral (R$)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            placeholder="0.00"
+                            {...field}
+                            onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                            className="h-12 rounded-xl bg-muted/30 border-border/50 focus:ring-primary/20"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="price_semiannual"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70">Semestral (R$)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            placeholder="0.00"
+                            {...field}
+                            onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                            className="h-12 rounded-xl bg-muted/30 border-border/50 focus:ring-primary/20"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="price_annual"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70">Anual (R$)</FormLabel>
                         <FormControl>
                           <Input
                             type="number"

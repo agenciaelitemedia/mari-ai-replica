@@ -8,6 +8,9 @@ export interface Plan {
   name: string;
   description: string | null;
   price: number;
+  price_quarterly: number;
+  price_semiannual: number;
+  price_annual: number;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -18,6 +21,9 @@ export interface PlanFormData {
   name: string;
   description: string;
   price: number;
+  price_quarterly: number;
+  price_semiannual: number;
+  price_annual: number;
   is_active: boolean;
   module_ids: string[];
 }
