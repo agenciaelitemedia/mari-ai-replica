@@ -15,24 +15,13 @@ async function isSuperAdmin(supabase: any, userId: string) {
 
 export const listProviders = createServerFn({ method: 'GET' })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { clientId?: string; type?: ProviderType } | undefined) =>
-    z.object({ clientId: z.string().optional(), type: z.string().optional() }).parse(input ?? {}),
+  .inputValidator((input: { type?: ProviderType } | undefined) =>
+    z.object({ type: z.string().optional() }).parse(input ?? {}),
   )
-  .handler(async ({ data, context }) => {
-    const { supabase, userId } = context
-    const superadmin = await isSuperAdmin(supabase, userId)
+  .handler(async ({ data }) => {
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
-
     let q = supabaseAdmin.from('queue_providers').select('*').order('created_at', { ascending: false })
-    if (!superadmin) {
-      const cid = await getUserClientId(supabase, userId)
-      if (!cid) return { providers: [] }
-      q = q.eq('client_id', cid)
-    } else if (data.clientId) {
-      q = q.eq('client_id', data.clientId)
-    }
     if (data.type) q = q.eq('provider_type', data.type)
-
     const { data: rows, error } = await q
     if (error) throw new Error(error.message)
     return { providers: rows ?? [] }
@@ -44,19 +33,13 @@ export const upsertProvider = createServerFn({ method: 'POST' })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context
     const superadmin = await isSuperAdmin(supabase, userId)
+    if (!superadmin) throw new Error('Apenas superadmin pode gerenciar provedores')
 
-    if (!superadmin) {
-      const cid = await getUserClientId(supabase, userId)
-      if (!cid || cid !== data.client_id) throw new Error('Sem permissão para este cliente')
-    }
-
-    const payload: any = { ...data }
+    const payload: any = { ...data, client_id: null }
     if (!payload.id) delete payload.id
-
     if (payload.provider_type === 'webchat' && !payload.widget_key) {
       payload.widget_key = generateRandomKey('wc')
     }
-
 
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
     const { data: row, error } = await supabaseAdmin
@@ -74,19 +57,8 @@ export const deleteProvider = createServerFn({ method: 'POST' })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context
     const superadmin = await isSuperAdmin(supabase, userId)
+    if (!superadmin) throw new Error('Apenas superadmin pode excluir provedores')
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
-
-    const { data: prov } = await supabaseAdmin
-      .from('queue_providers')
-      .select('id, client_id')
-      .eq('id', data.id)
-      .maybeSingle()
-    if (!prov) throw new Error('Provedor não encontrado')
-
-    if (!superadmin) {
-      const cid = await getUserClientId(supabase, userId)
-      if (cid !== prov.client_id) throw new Error('Sem permissão')
-    }
 
     const { data: linked } = await supabaseAdmin
       .from('queues')
@@ -101,6 +73,7 @@ export const deleteProvider = createServerFn({ method: 'POST' })
     if (error) throw new Error(error.message)
     return { ok: true }
   })
+
 
 export const testProvider = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])

@@ -19,7 +19,6 @@ export const PROVIDER_DESCRIPTIONS: Record<ProviderType, string> = {
 
 export const providerSchema = z.object({
   id: z.string().uuid().optional(),
-  client_id: z.string().min(1, 'Cliente obrigatório'),
   name: z.string().min(1, 'Nome obrigatório').max(120),
   provider_type: z.enum(PROVIDER_TYPES),
   is_active: z.boolean().default(true),
