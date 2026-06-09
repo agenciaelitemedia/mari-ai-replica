@@ -17,7 +17,7 @@ export interface GroupedMenuModules {
 }
 
 export function useMenuModules() {
-  const { isAdmin, hasPermission, user } = useAuth();
+  const { isAdmin, isSuperAdmin, hasPermission, user } = useAuth();
 
   const { data: modules = [], isLoading, error } = useQuery({
     queryKey: ['menu-modules'],
@@ -43,10 +43,13 @@ export function useMenuModules() {
       // Only show visible modules
       if (mod.is_menu_visible === false) return false;
       
+      // Superadmin sees everything
+      if (isSuperAdmin) return true;
+      
       // Check if user has view permission for this module
       return hasPermission(mod.code, 'view');
     });
-  }, [modules, hasPermission]);
+  }, [modules, hasPermission, isSuperAdmin]);
 
   // Group modules by menu_group
   const groupedModules = useMemo(() => {
