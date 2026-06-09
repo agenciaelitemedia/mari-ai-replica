@@ -2,7 +2,6 @@ import { QueueCard } from './QueueCard'
 
 interface Props {
   queues: any[]
-  clientsById: Record<string, string>
   onEdit: (q: any) => void
   onDelete: (id: string) => void
 }
