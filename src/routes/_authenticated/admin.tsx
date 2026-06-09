@@ -22,23 +22,23 @@ function AdminPage() {
   const [activeTab, setActiveTab] = useState<'permissions' | 'modules'>('permissions');
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="p-6 md:p-12 space-y-10 max-w-7xl mx-auto animate-in fade-in duration-500">
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <h1 className="text-2xl font-bold">Painel Administrativo</h1>
-          <p className="text-muted-foreground">
-            Gerenciamento de módulos e matriz de permissões
+          <h1 className="text-4xl font-extrabold tracking-tight mb-2">Painel <span className="text-gradient">Administrativo</span></h1>
+          <p className="text-lg text-muted-foreground font-medium max-w-2xl">
+            Central de controle de infraestrutura, módulos e segurança do sistema.
           </p>
         </div>
-      </div>
+      </header>
 
       <Tabs value={activeTab} onValueChange={(v: any) => setActiveTab(v)} className="w-full">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
-          <TabsTrigger value="permissions" className="flex items-center gap-2">
+        <TabsList className="grid w-full max-w-md grid-cols-2 bg-muted/50 p-1.5 h-14 rounded-2xl mb-8">
+          <TabsTrigger value="permissions" className="flex items-center gap-2 rounded-xl data-[state=active]:shadow-md font-bold text-sm">
             <Shield className="h-4 w-4" />
             Permissões
           </TabsTrigger>
-          <TabsTrigger value="modules" className="flex items-center gap-2">
+          <TabsTrigger value="modules" className="flex items-center gap-2 rounded-xl data-[state=active]:shadow-md font-bold text-sm">
             <Layers className="h-4 w-4" />
             Módulos
           </TabsTrigger>

@@ -64,24 +64,43 @@ function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted/30 px-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-6">
-          <Link to="/" className="inline-block">
-            <h1 className="text-4xl font-bold tracking-tight">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-muted/50 via-background to-muted/50 px-4 relative overflow-hidden">
+      {/* Background decorations */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
+      </div>
+
+      <div className="w-full max-w-md animate-in fade-in zoom-in-95 duration-500">
+        <div className="text-center mb-8">
+          <Link to="/" className="inline-flex items-center gap-3 mb-4 group transition-transform duration-300 hover:scale-105">
+            <div className="h-12 w-12 bg-linear-to-br from-primary to-primary/80 rounded-2xl flex items-center justify-center shadow-xl shadow-primary/20">
+              <span className="text-2xl font-bold text-primary-foreground">M</span>
+            </div>
+            <h1 className="text-4xl font-black tracking-tighter text-foreground">
               Mar<span className="text-primary">I.A</span>
             </h1>
           </Link>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Plataforma de atendimento, CRM e automação inteligente
+          <p className="text-muted-foreground font-medium">
+            Inteligência e automação em um só lugar.
           </p>
         </div>
-        <Card>
+        <Card className="border-border/40 shadow-2xl shadow-primary/5 backdrop-blur-xl bg-card/80 rounded-3xl overflow-hidden">
           <Tabs defaultValue="signin" className="w-full">
-            <CardHeader>
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="signin">Entrar</TabsTrigger>
-                <TabsTrigger value="signup">Criar conta</TabsTrigger>
+            <CardHeader className="p-1 border-b border-border/40">
+              <TabsList className="grid w-full grid-cols-2 bg-transparent h-14 p-1">
+                <TabsTrigger 
+                  value="signin" 
+                  className="rounded-2xl data-[state=active]:bg-background data-[state=active]:shadow-sm text-sm font-bold tracking-tight transition-all"
+                >
+                  Entrar
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="signup"
+                  className="rounded-2xl data-[state=active]:bg-background data-[state=active]:shadow-sm text-sm font-bold tracking-tight transition-all"
+                >
+                  Criar conta
+                </TabsTrigger>
               </TabsList>
             </CardHeader>
             <CardContent>
