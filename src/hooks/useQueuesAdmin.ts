@@ -3,7 +3,7 @@ import { useServerFn } from '@tanstack/react-start'
 import { toast } from 'sonner'
 import { listQueuesFull, upsertQueueFull, deleteQueueFull, listClientsForSelect } from '@/lib/providers.functions'
 
-export function useQueuesAdmin(clientId?: string) {
+export function useQueuesAdmin() {
   const qc = useQueryClient()
   const list = useServerFn(listQueuesFull)
   const upsert = useServerFn(upsertQueueFull)
@@ -11,8 +11,8 @@ export function useQueuesAdmin(clientId?: string) {
   const listClients = useServerFn(listClientsForSelect)
 
   const queuesQ = useQuery({
-    queryKey: ['queues-full', clientId ?? 'mine'],
-    queryFn: () => list({ data: { clientId } }),
+    queryKey: ['queues-full'],
+    queryFn: () => list(),
   })
 
   const clientsQ = useQuery({
