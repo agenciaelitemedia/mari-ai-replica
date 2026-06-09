@@ -35,16 +35,16 @@ import { toast } from 'sonner';
 
 const planSchema = z.object({
   name: z.string().min(1, 'O nome do plano é obrigatório'),
-  description: z.string().optional(),
+  description: z.string().default(''),
   price: z.number().min(0, 'O preço deve ser maior ou igual a zero'),
-  price_quarterly: z.number().min(0).optional().default(0),
-  price_semiannual: z.number().min(0).optional().default(0),
-  price_annual: z.number().min(0).optional().default(0),
+  price_quarterly: z.number().min(0).default(0),
+  price_semiannual: z.number().min(0).default(0),
+  price_annual: z.number().min(0).default(0),
   is_active: z.boolean().default(true),
   module_ids: z.array(z.string()).min(1, 'Selecione pelo menos um módulo'),
   settings: z.object({
     queues_count: z.number().min(1, 'Mínimo de 1 fila'),
-  }),
+  }).optional(),
 });
 
 interface PlanDialogProps {
