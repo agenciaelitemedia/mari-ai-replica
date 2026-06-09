@@ -3,6 +3,8 @@
 Rastreamento cronológico de implementações e mudanças críticas.
 
 ## [2026-06-09] - Expansão SaaS e Gestão de Planos
+- **Gestão de Clientes:** Implementada nova tela de criação/edição de clientes com estrutura de abas (Dados, Planos, Config, Usuário).
+- **Flexibilidade:** Adicionado campo `settings` (JSONB) na tabela `clients` para configurações dinâmicas.
 - **Arquitetura SaaS:** Implementação das tabelas `plans` e `plan_modules`.
 - **Preços Multi-Período:** Adicionados campos `price_quarterly`, `price_semiannual` e `price_annual`.
 - **Páginas Independentes:** Migração das funcionalidades de Admin para rotas dedicadas (`/plans` e `/clients`).

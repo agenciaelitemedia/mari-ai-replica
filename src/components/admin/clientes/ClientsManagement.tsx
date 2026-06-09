@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
-import { Loader2, UserPlus, Search, Edit3, Trash2, Globe, Phone, Mail, Layout } from 'lucide-react';
+import { Loader2, UserPlus, Search, Edit3, Trash2, Globe, Phone, Mail, Layout, Building } from 'lucide-react';
 import {
   Table,
   TableBody,
