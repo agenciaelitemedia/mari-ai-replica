@@ -65,19 +65,241 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_conversation_history: {
+        Row: {
+          action: string
+          actor_name: string | null
+          conversation_id: string
+          created_at: string
+          from_value: string | null
+          id: string
+          notes: string | null
+          to_value: string | null
+        }
+        Insert: {
+          action: string
+          actor_name?: string | null
+          conversation_id: string
+          created_at?: string
+          from_value?: string | null
+          id?: string
+          notes?: string | null
+          to_value?: string | null
+        }
+        Update: {
+          action?: string
+          actor_name?: string | null
+          conversation_id?: string
+          created_at?: string
+          from_value?: string | null
+          id?: string
+          notes?: string | null
+          to_value?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_conversation_history_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "chat_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_conversation_tags: {
+        Row: {
+          conversation_id: string
+          created_at: string
+          id: string
+          tag_id: string
+        }
+        Insert: {
+          conversation_id: string
+          created_at?: string
+          id?: string
+          tag_id: string
+        }
+        Update: {
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_conversation_tags_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "chat_conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_conversation_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "chat_tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_conversations: {
+        Row: {
+          assigned_to: string | null
+          channel: string
+          client_id: string
+          close_note: string | null
+          close_reason: string | null
+          closed_at: string | null
+          cod_agent: string | null
+          contact_id: string
+          created_at: string
+          department: string | null
+          first_response_at: string | null
+          id: string
+          metadata: Json | null
+          opened_at: string
+          priority: string
+          protocol: string
+          queue_id: string | null
+          resolved_at: string | null
+          status: string
+          tags: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          channel?: string
+          client_id: string
+          close_note?: string | null
+          close_reason?: string | null
+          closed_at?: string | null
+          cod_agent?: string | null
+          contact_id: string
+          created_at?: string
+          department?: string | null
+          first_response_at?: string | null
+          id?: string
+          metadata?: Json | null
+          opened_at?: string
+          priority?: string
+          protocol: string
+          queue_id?: string | null
+          resolved_at?: string | null
+          status?: string
+          tags?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          channel?: string
+          client_id?: string
+          close_note?: string | null
+          close_reason?: string | null
+          closed_at?: string | null
+          cod_agent?: string | null
+          contact_id?: string
+          created_at?: string
+          department?: string | null
+          first_response_at?: string | null
+          id?: string
+          metadata?: Json | null
+          opened_at?: string
+          priority?: string
+          protocol?: string
+          queue_id?: string | null
+          resolved_at?: string | null
+          status?: string
+          tags?: string[] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_conversations_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "chat_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_departments: {
+        Row: {
+          agents: string[] | null
+          client_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          agents?: string[] | null
+          client_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          agents?: string[] | null
+          client_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      chat_message_reactions: {
+        Row: {
+          created_at: string
+          emoji: string
+          id: string
+          message_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          emoji: string
+          id?: string
+          message_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          emoji?: string
+          id?: string
+          message_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_message_reactions_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "chat_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_messages: {
         Row: {
           caption: string | null
           client_id: string
           contact_id: string
+          conversation_id: string | null
           created_at: string
           file_name: string | null
           from_me: boolean | null
           id: string
+          internal_note: boolean | null
           media_url: string | null
           message_id: string | null
           metadata: Json | null
           reply_to: string | null
+          sender_name: string | null
           status: string | null
           text: string | null
           timestamp: string | null
@@ -87,14 +309,17 @@ export type Database = {
           caption?: string | null
           client_id: string
           contact_id: string
+          conversation_id?: string | null
           created_at?: string
           file_name?: string | null
           from_me?: boolean | null
           id?: string
+          internal_note?: boolean | null
           media_url?: string | null
           message_id?: string | null
           metadata?: Json | null
           reply_to?: string | null
+          sender_name?: string | null
           status?: string | null
           text?: string | null
           timestamp?: string | null
@@ -104,14 +329,17 @@ export type Database = {
           caption?: string | null
           client_id?: string
           contact_id?: string
+          conversation_id?: string | null
           created_at?: string
           file_name?: string | null
           from_me?: boolean | null
           id?: string
+          internal_note?: boolean | null
           media_url?: string | null
           message_id?: string | null
           metadata?: Json | null
           reply_to?: string | null
+          sender_name?: string | null
           status?: string | null
           text?: string | null
           timestamp?: string | null
@@ -125,7 +353,38 @@ export type Database = {
             referencedRelation: "chat_contacts"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "chat_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "chat_conversations"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      chat_tags: {
+        Row: {
+          client_id: string
+          color: string
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          client_id: string
+          color?: string
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          client_id?: string
+          color?: string
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
       }
       crm_boards: {
         Row: {
@@ -456,6 +715,108 @@ export type Database = {
           is_active?: boolean
           phone?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      queue_providers: {
+        Row: {
+          client_id: string
+          created_at: string
+          evo_apikey: string | null
+          evo_url: string | null
+          id: string
+          is_active: boolean
+          metadata: Json | null
+          name: string
+          provider_type: string
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          evo_apikey?: string | null
+          evo_url?: string | null
+          id?: string
+          is_active?: boolean
+          metadata?: Json | null
+          name: string
+          provider_type?: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          evo_apikey?: string | null
+          evo_url?: string | null
+          id?: string
+          is_active?: boolean
+          metadata?: Json | null
+          name?: string
+          provider_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      queues: {
+        Row: {
+          channel_type: string
+          client_id: string
+          created_at: string
+          deleted_at: string | null
+          evo_apikey: string | null
+          evo_instance: string | null
+          evo_url: string | null
+          hub: string | null
+          id: string
+          is_active: boolean
+          is_deleted: boolean
+          metadata: Json | null
+          name: string
+          phone_number: string | null
+          updated_at: string
+          waba_id: string | null
+          waba_number_id: string | null
+          waba_token: string | null
+        }
+        Insert: {
+          channel_type?: string
+          client_id: string
+          created_at?: string
+          deleted_at?: string | null
+          evo_apikey?: string | null
+          evo_instance?: string | null
+          evo_url?: string | null
+          hub?: string | null
+          id?: string
+          is_active?: boolean
+          is_deleted?: boolean
+          metadata?: Json | null
+          name: string
+          phone_number?: string | null
+          updated_at?: string
+          waba_id?: string | null
+          waba_number_id?: string | null
+          waba_token?: string | null
+        }
+        Update: {
+          channel_type?: string
+          client_id?: string
+          created_at?: string
+          deleted_at?: string | null
+          evo_apikey?: string | null
+          evo_instance?: string | null
+          evo_url?: string | null
+          hub?: string | null
+          id?: string
+          is_active?: boolean
+          is_deleted?: boolean
+          metadata?: Json | null
+          name?: string
+          phone_number?: string | null
+          updated_at?: string
+          waba_id?: string | null
+          waba_number_id?: string | null
+          waba_token?: string | null
         }
         Relationships: []
       }
