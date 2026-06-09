@@ -31,6 +31,7 @@ function ClientDetailPage() {
   const navigate = useNavigate();
   const { data: client, isLoading } = useClient(id);
   const [copied, setCopied] = useState(false);
+  const [copyError, setCopyError] = useState(false);
 
   const { data: plan } = useQuery({
     queryKey: ['plan', client?.plan_id],
@@ -56,7 +57,6 @@ function ClientDetailPage() {
     cepFmt,
   ].filter(Boolean).join(', ');
 
-  const [copyError, setCopyError] = useState(false);
   const copyPwd = async () => {
     if (!client.temporary_password) return;
     try {
