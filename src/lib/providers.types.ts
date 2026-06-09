@@ -1,84 +1,45 @@
 import { z } from 'zod'
 
-export const PROVIDER_TYPES = ['uazapi', 'evolution', 'waba', 'instagram', 'webchat'] as const
+export const PROVIDER_TYPES = ['uazapi', 'waba', 'instagram', 'webchat'] as const
 export type ProviderType = (typeof PROVIDER_TYPES)[number]
 
 export const PROVIDER_LABELS: Record<ProviderType, string> = {
-  uazapi: 'UazAPI',
-  evolution: 'Evolution API',
-  waba: 'WhatsApp Oficial (WABA)',
-  instagram: 'Instagram (Meta)',
-  webchat: 'Webchat',
+  uazapi: 'UaZapi (WhatsApp)',
+  waba: 'API Oficial Meta (WABA)',
+  instagram: 'Instagram',
+  webchat: 'WebChat',
 }
 
 export const PROVIDER_DESCRIPTIONS: Record<ProviderType, string> = {
-  uazapi: 'WhatsApp via UazAPI (token + instance)',
-  evolution: 'WhatsApp via Evolution API (apikey + instance)',
+  uazapi: 'WhatsApp via UaZapi (URL + admin token)',
   waba: 'WhatsApp Business API oficial via Meta Cloud',
   instagram: 'Direct Messages do Instagram via Meta',
   webchat: 'Widget de chat para o seu site',
 }
 
-const baseFields = {
+export const providerSchema = z.object({
   id: z.string().uuid().optional(),
   client_id: z.string().min(1, 'Cliente obrigatório'),
   name: z.string().min(1, 'Nome obrigatório').max(120),
+  provider_type: z.enum(PROVIDER_TYPES),
   is_active: z.boolean().default(true),
-  metadata: z.record(z.any()).optional(),
-}
-
-export const uazapiSchema = z.object({
-  ...baseFields,
-  provider_type: z.literal('uazapi'),
-  evo_url: z.string().url('URL inválida'),
-  evo_apikey: z.string().min(1, 'Token obrigatório'),
-  instance_name: z.string().min(1, 'Instance obrigatória'),
-  phone_number: z.string().optional(),
+  // uazapi
+  evo_url: z.string().nullable().optional(),
+  evo_apikey: z.string().nullable().optional(),
+  // waba
+  meta_app_id: z.string().nullable().optional(),
+  meta_app_secret: z.string().nullable().optional(),
+  waba_business_id: z.string().nullable().optional(),
+  waba_token: z.string().nullable().optional(),
+  // instagram
+  instagram_page_id: z.string().nullable().optional(),
+  instagram_user_id: z.string().nullable().optional(),
+  page_access_token: z.string().nullable().optional(),
+  page_name: z.string().nullable().optional(),
+  // webchat
+  webchat_config_id: z.string().uuid().nullable().optional(),
+  widget_key: z.string().nullable().optional(),
 })
-
-export const evolutionSchema = z.object({
-  ...baseFields,
-  provider_type: z.literal('evolution'),
-  evo_url: z.string().url('URL inválida'),
-  evo_apikey: z.string().min(1, 'API key obrigatória'),
-  instance_name: z.string().min(1, 'Instance obrigatória'),
-  phone_number: z.string().optional(),
-})
-
-export const wabaSchema = z.object({
-  ...baseFields,
-  provider_type: z.literal('waba'),
-  waba_id: z.string().min(1, 'WABA ID obrigatório'),
-  phone_number_id: z.string().min(1, 'Phone Number ID obrigatório'),
-  access_token: z.string().min(1, 'Access Token obrigatório'),
-  app_secret: z.string().optional(),
-  verify_token: z.string().optional(),
-  phone_number: z.string().optional(),
-})
-
-export const instagramSchema = z.object({
-  ...baseFields,
-  provider_type: z.literal('instagram'),
-  ig_business_id: z.string().min(1, 'IG Business ID obrigatório'),
-  page_id: z.string().optional(),
-  access_token: z.string().min(1, 'Access Token obrigatório'),
-  verify_token: z.string().optional(),
-})
-
-export const webchatSchema = z.object({
-  ...baseFields,
-  provider_type: z.literal('webchat'),
-  widget_key: z.string().optional(),
-  allowed_origins: z.array(z.string()).optional(),
-})
-
-export const providerSchema = z.discriminatedUnion('provider_type', [
-  uazapiSchema,
-  evolutionSchema,
-  wabaSchema,
-  instagramSchema,
-  webchatSchema,
-])
 
 export type ProviderInput = z.infer<typeof providerSchema>
 
