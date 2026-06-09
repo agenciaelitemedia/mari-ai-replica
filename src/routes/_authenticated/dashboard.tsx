@@ -38,11 +38,17 @@ const QUICK = [
 function DashboardPage() {
   return (
     <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-2 duration-500">
-      <header>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground mb-1">Dashboard</h1>
-        <p className="text-sm text-muted-foreground">
-          Bem-vindo de volta! Aqui está o que está acontecendo hoje.
-        </p>
+      <header className="relative overflow-hidden rounded-3xl bg-primary text-primary-foreground p-8 md:p-10">
+        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_right,white,transparent_60%)]" />
+        <div className="relative">
+          <span className="inline-block bg-white/15 backdrop-blur text-xs font-semibold px-3 py-1 rounded-full mb-4">
+            Visão geral
+          </span>
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-2">Dashboard</h1>
+          <p className="text-sm md:text-base text-primary-foreground/80 max-w-xl">
+            Bem-vindo de volta! Aqui está o que está acontecendo hoje na sua operação.
+          </p>
+        </div>
       </header>
 
       {/* Stats */}
