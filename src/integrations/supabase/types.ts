@@ -14,16 +14,489 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      chat_contacts: {
+        Row: {
+          avatar: string | null
+          client_id: string
+          cod_agent: string | null
+          created_at: string
+          id: string
+          is_archived: boolean | null
+          is_group: boolean | null
+          is_muted: boolean | null
+          last_message_at: string | null
+          last_message_text: string | null
+          name: string
+          phone: string
+          unread_count: number | null
+          updated_at: string
+        }
+        Insert: {
+          avatar?: string | null
+          client_id: string
+          cod_agent?: string | null
+          created_at?: string
+          id?: string
+          is_archived?: boolean | null
+          is_group?: boolean | null
+          is_muted?: boolean | null
+          last_message_at?: string | null
+          last_message_text?: string | null
+          name: string
+          phone: string
+          unread_count?: number | null
+          updated_at?: string
+        }
+        Update: {
+          avatar?: string | null
+          client_id?: string
+          cod_agent?: string | null
+          created_at?: string
+          id?: string
+          is_archived?: boolean | null
+          is_group?: boolean | null
+          is_muted?: boolean | null
+          last_message_at?: string | null
+          last_message_text?: string | null
+          name?: string
+          phone?: string
+          unread_count?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      chat_messages: {
+        Row: {
+          caption: string | null
+          client_id: string
+          contact_id: string
+          created_at: string
+          file_name: string | null
+          from_me: boolean | null
+          id: string
+          media_url: string | null
+          message_id: string | null
+          metadata: Json | null
+          reply_to: string | null
+          status: string | null
+          text: string | null
+          timestamp: string | null
+          type: string | null
+        }
+        Insert: {
+          caption?: string | null
+          client_id: string
+          contact_id: string
+          created_at?: string
+          file_name?: string | null
+          from_me?: boolean | null
+          id?: string
+          media_url?: string | null
+          message_id?: string | null
+          metadata?: Json | null
+          reply_to?: string | null
+          status?: string | null
+          text?: string | null
+          timestamp?: string | null
+          type?: string | null
+        }
+        Update: {
+          caption?: string | null
+          client_id?: string
+          contact_id?: string
+          created_at?: string
+          file_name?: string | null
+          from_me?: boolean | null
+          id?: string
+          media_url?: string | null
+          message_id?: string | null
+          metadata?: Json | null
+          reply_to?: string | null
+          status?: string | null
+          text?: string | null
+          timestamp?: string | null
+          type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "chat_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_boards: {
+        Row: {
+          cod_agent: string
+          color: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          icon: string | null
+          id: string
+          is_archived: boolean
+          name: string
+          position: number
+          settings: Json | null
+          updated_at: string
+        }
+        Insert: {
+          cod_agent: string
+          color?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_archived?: boolean
+          name: string
+          position?: number
+          settings?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          cod_agent?: string
+          color?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_archived?: boolean
+          name?: string
+          position?: number
+          settings?: Json | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      crm_custom_fields: {
+        Row: {
+          board_id: string
+          cod_agent: string
+          created_at: string
+          default_value: string | null
+          field_label: string
+          field_name: string
+          field_type: string
+          id: string
+          is_required: boolean
+          is_visible: boolean
+          options: Json | null
+          position: number
+          updated_at: string
+        }
+        Insert: {
+          board_id: string
+          cod_agent: string
+          created_at?: string
+          default_value?: string | null
+          field_label: string
+          field_name: string
+          field_type?: string
+          id?: string
+          is_required?: boolean
+          is_visible?: boolean
+          options?: Json | null
+          position?: number
+          updated_at?: string
+        }
+        Update: {
+          board_id?: string
+          cod_agent?: string
+          created_at?: string
+          default_value?: string | null
+          field_label?: string
+          field_name?: string
+          field_type?: string
+          id?: string
+          is_required?: boolean
+          is_visible?: boolean
+          options?: Json | null
+          position?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_custom_fields_board_id_fkey"
+            columns: ["board_id"]
+            isOneToOne: false
+            referencedRelation: "crm_boards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_deal_history: {
+        Row: {
+          action: string
+          changed_at: string
+          changed_by: string | null
+          changes: Json | null
+          deal_id: string
+          from_pipeline_id: string | null
+          id: string
+          notes: string | null
+          to_pipeline_id: string | null
+        }
+        Insert: {
+          action: string
+          changed_at?: string
+          changed_by?: string | null
+          changes?: Json | null
+          deal_id: string
+          from_pipeline_id?: string | null
+          id?: string
+          notes?: string | null
+          to_pipeline_id?: string | null
+        }
+        Update: {
+          action?: string
+          changed_at?: string
+          changed_by?: string | null
+          changes?: Json | null
+          deal_id?: string
+          from_pipeline_id?: string | null
+          id?: string
+          notes?: string | null
+          to_pipeline_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_deal_history_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "crm_deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_deal_history_from_pipeline_id_fkey"
+            columns: ["from_pipeline_id"]
+            isOneToOne: false
+            referencedRelation: "crm_pipelines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_deal_history_to_pipeline_id_fkey"
+            columns: ["to_pipeline_id"]
+            isOneToOne: false
+            referencedRelation: "crm_pipelines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_deals: {
+        Row: {
+          assigned_to: string | null
+          board_id: string
+          cod_agent: string
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          created_by: string | null
+          currency: string | null
+          custom_fields: Json | null
+          description: string | null
+          expected_close_date: string | null
+          id: string
+          pipeline_id: string
+          position: number
+          priority: string | null
+          stage_entered_at: string
+          status: string | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+          value: number | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          board_id: string
+          cod_agent: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          custom_fields?: Json | null
+          description?: string | null
+          expected_close_date?: string | null
+          id?: string
+          pipeline_id: string
+          position?: number
+          priority?: string | null
+          stage_entered_at?: string
+          status?: string | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          value?: number | null
+        }
+        Update: {
+          assigned_to?: string | null
+          board_id?: string
+          cod_agent?: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          custom_fields?: Json | null
+          description?: string | null
+          expected_close_date?: string | null
+          id?: string
+          pipeline_id?: string
+          position?: number
+          priority?: string | null
+          stage_entered_at?: string
+          status?: string | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_deals_board_id_fkey"
+            columns: ["board_id"]
+            isOneToOne: false
+            referencedRelation: "crm_boards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_deals_pipeline_id_fkey"
+            columns: ["pipeline_id"]
+            isOneToOne: false
+            referencedRelation: "crm_pipelines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_pipelines: {
+        Row: {
+          board_id: string
+          cod_agent: string
+          color: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          position: number
+          updated_at: string
+          win_probability: number | null
+        }
+        Insert: {
+          board_id: string
+          cod_agent: string
+          color?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          position?: number
+          updated_at?: string
+          win_probability?: number | null
+        }
+        Update: {
+          board_id?: string
+          cod_agent?: string
+          color?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          position?: number
+          updated_at?: string
+          win_probability?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_pipelines_board_id_fkey"
+            columns: ["board_id"]
+            isOneToOne: false
+            referencedRelation: "crm_boards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          cod_agent: string | null
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          is_active: boolean
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          cod_agent?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id: string
+          is_active?: boolean
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          cod_agent?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          is_active?: boolean
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "manager" | "agent" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +623,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "manager", "agent", "user"],
+    },
   },
 } as const
