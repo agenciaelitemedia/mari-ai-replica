@@ -111,7 +111,6 @@ function QueuesPage() {
           ) : (
             <QueuesList 
               queues={queues} 
-              clientsById={{}} // No longer needed as it's isolated by client
               onEdit={(q) => { setEditing(q); setOpen(true) }} 
               onDelete={handleDelete} 
             />
