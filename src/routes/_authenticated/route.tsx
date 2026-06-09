@@ -66,7 +66,7 @@ function AuthenticatedLayout() {
             <Sparkles className="h-5 w-5 text-primary-foreground" />
           </div>
           <span className="text-xl font-extrabold tracking-tight text-foreground">
-            Mar<span className="text-primary">I.A</span>
+            Mar<span className="text-primary">I.A.</span>
           </span>
         </Link>
       </div>

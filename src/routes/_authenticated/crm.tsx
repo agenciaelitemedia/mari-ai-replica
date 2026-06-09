@@ -33,7 +33,7 @@ import { Plus, Phone, MessageSquare, DollarSign } from 'lucide-react'
 import { toast } from 'sonner'
 
 export const Route = createFileRoute('/_authenticated/crm')({
-  head: () => ({ meta: [{ title: 'CRM — MarI.A' }] }),
+  head: () => ({ meta: [{ title: 'CRM — MarI.A.' }] }),
   component: CrmPage,
 })
 
