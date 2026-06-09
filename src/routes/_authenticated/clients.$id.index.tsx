@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useParams, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { useClient } from '@/hooks/useClientsAdmin';
 import { useQuery } from '@tanstack/react-query';
@@ -27,7 +27,7 @@ function Field({ label, value }: { label: string; value?: React.ReactNode }) {
 
 function ClientDetailPage() {
   const { isSuperAdmin } = useAuth();
-  const { id } = useParams({ from: '/_authenticated/clients/$id' });
+  const { id } = Route.useParams();
   const navigate = useNavigate();
   const { data: client, isLoading } = useClient(id);
   const [copied, setCopied] = useState(false);
