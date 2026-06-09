@@ -35,12 +35,12 @@ import { toast } from 'sonner';
 
 const planSchema = z.object({
   name: z.string().min(1, 'O nome do plano é obrigatório'),
-  description: z.string().default(''),
+  description: z.string(),
   price: z.number().min(0, 'O preço deve ser maior ou igual a zero'),
-  price_quarterly: z.number().min(0).default(0),
-  price_semiannual: z.number().min(0).default(0),
-  price_annual: z.number().min(0).default(0),
-  is_active: z.boolean().default(true),
+  price_quarterly: z.number().min(0),
+  price_semiannual: z.number().min(0),
+  price_annual: z.number().min(0),
+  is_active: z.boolean(),
   module_ids: z.array(z.string()).min(1, 'Selecione pelo menos um módulo'),
   settings: z.object({
     queues_count: z.number().min(1, 'Mínimo de 1 fila'),
@@ -409,6 +409,7 @@ export function PlanDialog({ open, onClose, plan, onSave, isLoading }: PlanDialo
                                 type="number"
                                 min={1}
                                 {...field}
+                                value={field.value || 1}
                                 onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
                                 className="h-14 rounded-2xl bg-card border-border/40 focus:ring-primary/20 font-black text-xl text-center"
                               />
