@@ -141,11 +141,14 @@ function ChatPage() {
         )}
         {selected && (
           <>
-            <div className="p-4 border-b">
-              <p className="font-semibold">{selected.contact?.name}</p>
-              <p className="text-xs text-muted-foreground">
-                {selected.contact?.phone} • {selected.protocol}
-              </p>
+            <div className="p-4 border-b flex items-center justify-between gap-2">
+              <div>
+                <p className="font-semibold">{selected.contact?.name}</p>
+                <p className="text-xs text-muted-foreground">
+                  {selected.contact?.phone} • {selected.protocol}
+                </p>
+              </div>
+              <LinkToDealButton conversationId={selected.id} />
             </div>
             <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-2">
               {msgsQ.data?.messages?.map((m: any) => (
