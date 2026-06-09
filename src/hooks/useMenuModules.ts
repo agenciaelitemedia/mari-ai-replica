@@ -17,9 +17,35 @@ export interface GroupedMenuModules {
 }
 
 export function useMenuModules() {
-  const { isAdmin, isSuperAdmin, hasPermission, user } = useAuth();
+  const { isAdmin, isSuperAdmin, hasPermission, user, profile } = useAuth();
 
-  const { data: modules = [], isLoading, error } = useQuery({
+  const { data: planModules = [], isLoading: isLoadingPlan } = useQuery({
+    queryKey: ['client-plan-modules', profile?.client_id],
+    queryFn: async () => {
+      if (!profile?.client_id || isSuperAdmin) return null;
+
+      // 1. Get client's plan_id
+      const { data: clientData, error: clientError } = await supabase
+        .from('clients')
+        .select('plan_id')
+        .eq('id', profile.client_id)
+        .single();
+      
+      if (clientError || !clientData?.plan_id) return [];
+
+      // 2. Get modules for that plan
+      const { data: pmData, error: pmError } = await supabase
+        .from('plan_modules')
+        .select('module_id')
+        .eq('plan_id', clientData.plan_id);
+
+      if (pmError) throw pmError;
+      return pmData.map(pm => pm.module_id);
+    },
+    enabled: !!profile?.client_id || isSuperAdmin,
+  });
+
+  const { data: modules = [], isLoading: isLoadingModules, error } = useQuery({
     queryKey: ['menu-modules'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -28,16 +54,17 @@ export function useMenuModules() {
         .eq('is_active', true)
         .order('display_order', { ascending: true });
       
-      console.log('Modules fetched:', data?.length);
       if (error) throw error;
       return data as MenuModule[];
     },
     enabled: !!user,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    gcTime: 1000 * 60 * 30, // 30 minutes
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 30,
   });
 
-  // Filter modules based on permissions
+  const isLoading = isLoadingPlan || isLoadingModules;
+
+  // Filter modules based on permissions and plan
   const filteredModules = useMemo(() => {
     return modules.filter((mod) => {
       // Only show visible modules
@@ -45,11 +72,16 @@ export function useMenuModules() {
       
       // Superadmin sees everything
       if (isSuperAdmin) return true;
+
+      // If client has a plan, filter by plan modules
+      if (planModules !== null && !planModules.includes(mod.id)) {
+        return false;
+      }
       
       // Check if user has view permission for this module
       return hasPermission(mod.code, 'view');
     });
-  }, [modules, hasPermission, isSuperAdmin]);
+  }, [modules, hasPermission, isSuperAdmin, planModules]);
 
   // Group modules by menu_group
   const groupedModules = useMemo(() => {
