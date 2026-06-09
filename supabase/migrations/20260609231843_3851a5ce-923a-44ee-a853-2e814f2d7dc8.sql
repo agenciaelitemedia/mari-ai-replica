@@ -1,0 +1,1 @@
+UPDATE public.modules SET route = '/providers' WHERE code = 'providers'; UPDATE public.modules SET route = '/queues' WHERE code = 'queues';
