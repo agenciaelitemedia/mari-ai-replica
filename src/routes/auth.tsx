@@ -11,7 +11,7 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Entrar — MarI.A" },
+      { title: "Entrar — MarI.A." },
       { name: "description", content: "Acesse sua conta MarI.A." },
     ],
   }),
@@ -78,7 +78,7 @@ function AuthPage() {
               <span className="text-2xl font-bold text-primary-foreground">M</span>
             </div>
             <h1 className="text-4xl font-black tracking-tighter text-foreground">
-              Mar<span className="text-primary">I.A</span>
+              Mar<span className="text-primary">I.A.</span>
             </h1>
           </Link>
           <p className="text-muted-foreground font-medium">

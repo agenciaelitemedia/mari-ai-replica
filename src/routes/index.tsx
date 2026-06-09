@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "MarI.A — Atendimento, CRM e Automação Inteligente" },
+      { title: "MarI.A. — Atendimento, CRM e Automação Inteligente" },
       { name: "description", content: "Plataforma de atendimento omnichannel, CRM e automações com IA." },
     ],
   }),
