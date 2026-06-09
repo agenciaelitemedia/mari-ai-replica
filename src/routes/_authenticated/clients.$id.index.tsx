@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 import { maskCpfCnpj, maskPhone, maskCep } from '@/lib/br-utils';
 import { DeleteClientDialog } from '@/components/admin/clientes/DeleteClientDialog';
 
-export const Route = createFileRoute('/_authenticated/clients/$id')({
+export const Route = createFileRoute('/_authenticated/clients/$id/')({
   component: ClientDetailPage,
 });
 

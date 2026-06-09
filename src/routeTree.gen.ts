@@ -27,7 +27,7 @@ import { Route as AuthenticatedAgentesRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedClientsIndexRouteImport } from './routes/_authenticated/clients.index'
 import { Route as AuthenticatedClientsNewRouteImport } from './routes/_authenticated/clients.new'
-import { Route as AuthenticatedClientsIdRouteImport } from './routes/_authenticated/clients.$id'
+import { Route as AuthenticatedClientsIdIndexRouteImport } from './routes/_authenticated/clients.$id.index'
 import { Route as ApiPublicWebhooksUazapiRouteImport } from './routes/api/public/webhooks/uazapi'
 import { Route as AuthenticatedClientsIdEditRouteImport } from './routes/_authenticated/clients.$id.edit'
 
@@ -122,11 +122,12 @@ const AuthenticatedClientsNewRoute = AuthenticatedClientsNewRouteImport.update({
   path: '/clients/new',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedClientsIdRoute = AuthenticatedClientsIdRouteImport.update({
-  id: '/clients/$id',
-  path: '/clients/$id',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
+const AuthenticatedClientsIdIndexRoute =
+  AuthenticatedClientsIdIndexRouteImport.update({
+    id: '/clients/$id/',
+    path: '/clients/$id/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const ApiPublicWebhooksUazapiRoute = ApiPublicWebhooksUazapiRouteImport.update({
   id: '/api/public/webhooks/uazapi',
   path: '/api/public/webhooks/uazapi',
@@ -134,9 +135,9 @@ const ApiPublicWebhooksUazapiRoute = ApiPublicWebhooksUazapiRouteImport.update({
 } as any)
 const AuthenticatedClientsIdEditRoute =
   AuthenticatedClientsIdEditRouteImport.update({
-    id: '/edit',
-    path: '/edit',
-    getParentRoute: () => AuthenticatedClientsIdRoute,
+    id: '/clients/$id/edit',
+    path: '/clients/$id/edit',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -155,11 +156,11 @@ export interface FileRoutesByFullPath {
   '/legal-cases': typeof AuthenticatedLegalCasesRoute
   '/plans': typeof AuthenticatedPlansRoute
   '/telefonia': typeof AuthenticatedTelefoniaRoute
-  '/clients/$id': typeof AuthenticatedClientsIdRouteWithChildren
   '/clients/new': typeof AuthenticatedClientsNewRoute
   '/clients/': typeof AuthenticatedClientsIndexRoute
   '/clients/$id/edit': typeof AuthenticatedClientsIdEditRoute
   '/api/public/webhooks/uazapi': typeof ApiPublicWebhooksUazapiRoute
+  '/clients/$id/': typeof AuthenticatedClientsIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -177,11 +178,11 @@ export interface FileRoutesByTo {
   '/legal-cases': typeof AuthenticatedLegalCasesRoute
   '/plans': typeof AuthenticatedPlansRoute
   '/telefonia': typeof AuthenticatedTelefoniaRoute
-  '/clients/$id': typeof AuthenticatedClientsIdRouteWithChildren
   '/clients/new': typeof AuthenticatedClientsNewRoute
   '/clients': typeof AuthenticatedClientsIndexRoute
   '/clients/$id/edit': typeof AuthenticatedClientsIdEditRoute
   '/api/public/webhooks/uazapi': typeof ApiPublicWebhooksUazapiRoute
+  '/clients/$id': typeof AuthenticatedClientsIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -201,11 +202,11 @@ export interface FileRoutesById {
   '/_authenticated/legal-cases': typeof AuthenticatedLegalCasesRoute
   '/_authenticated/plans': typeof AuthenticatedPlansRoute
   '/_authenticated/telefonia': typeof AuthenticatedTelefoniaRoute
-  '/_authenticated/clients/$id': typeof AuthenticatedClientsIdRouteWithChildren
   '/_authenticated/clients/new': typeof AuthenticatedClientsNewRoute
   '/_authenticated/clients/': typeof AuthenticatedClientsIndexRoute
   '/_authenticated/clients/$id/edit': typeof AuthenticatedClientsIdEditRoute
   '/api/public/webhooks/uazapi': typeof ApiPublicWebhooksUazapiRoute
+  '/_authenticated/clients/$id/': typeof AuthenticatedClientsIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -225,11 +226,11 @@ export interface FileRouteTypes {
     | '/legal-cases'
     | '/plans'
     | '/telefonia'
-    | '/clients/$id'
     | '/clients/new'
     | '/clients/'
     | '/clients/$id/edit'
     | '/api/public/webhooks/uazapi'
+    | '/clients/$id/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -247,11 +248,11 @@ export interface FileRouteTypes {
     | '/legal-cases'
     | '/plans'
     | '/telefonia'
-    | '/clients/$id'
     | '/clients/new'
     | '/clients'
     | '/clients/$id/edit'
     | '/api/public/webhooks/uazapi'
+    | '/clients/$id'
   id:
     | '__root__'
     | '/'
@@ -270,11 +271,11 @@ export interface FileRouteTypes {
     | '/_authenticated/legal-cases'
     | '/_authenticated/plans'
     | '/_authenticated/telefonia'
-    | '/_authenticated/clients/$id'
     | '/_authenticated/clients/new'
     | '/_authenticated/clients/'
     | '/_authenticated/clients/$id/edit'
     | '/api/public/webhooks/uazapi'
+    | '/_authenticated/clients/$id/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -412,11 +413,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedClientsNewRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/clients/$id': {
-      id: '/_authenticated/clients/$id'
+    '/_authenticated/clients/$id/': {
+      id: '/_authenticated/clients/$id/'
       path: '/clients/$id'
-      fullPath: '/clients/$id'
-      preLoaderRoute: typeof AuthenticatedClientsIdRouteImport
+      fullPath: '/clients/$id/'
+      preLoaderRoute: typeof AuthenticatedClientsIdIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/api/public/webhooks/uazapi': {
@@ -428,27 +429,13 @@ declare module '@tanstack/react-router' {
     }
     '/_authenticated/clients/$id/edit': {
       id: '/_authenticated/clients/$id/edit'
-      path: '/edit'
+      path: '/clients/$id/edit'
       fullPath: '/clients/$id/edit'
       preLoaderRoute: typeof AuthenticatedClientsIdEditRouteImport
-      parentRoute: typeof AuthenticatedClientsIdRoute
+      parentRoute: typeof AuthenticatedRouteRoute
     }
   }
 }
-
-interface AuthenticatedClientsIdRouteChildren {
-  AuthenticatedClientsIdEditRoute: typeof AuthenticatedClientsIdEditRoute
-}
-
-const AuthenticatedClientsIdRouteChildren: AuthenticatedClientsIdRouteChildren =
-  {
-    AuthenticatedClientsIdEditRoute: AuthenticatedClientsIdEditRoute,
-  }
-
-const AuthenticatedClientsIdRouteWithChildren =
-  AuthenticatedClientsIdRoute._addFileChildren(
-    AuthenticatedClientsIdRouteChildren,
-  )
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
@@ -464,9 +451,10 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedLegalCasesRoute: typeof AuthenticatedLegalCasesRoute
   AuthenticatedPlansRoute: typeof AuthenticatedPlansRoute
   AuthenticatedTelefoniaRoute: typeof AuthenticatedTelefoniaRoute
-  AuthenticatedClientsIdRoute: typeof AuthenticatedClientsIdRouteWithChildren
   AuthenticatedClientsNewRoute: typeof AuthenticatedClientsNewRoute
   AuthenticatedClientsIndexRoute: typeof AuthenticatedClientsIndexRoute
+  AuthenticatedClientsIdEditRoute: typeof AuthenticatedClientsIdEditRoute
+  AuthenticatedClientsIdIndexRoute: typeof AuthenticatedClientsIdIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -483,9 +471,10 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedLegalCasesRoute: AuthenticatedLegalCasesRoute,
   AuthenticatedPlansRoute: AuthenticatedPlansRoute,
   AuthenticatedTelefoniaRoute: AuthenticatedTelefoniaRoute,
-  AuthenticatedClientsIdRoute: AuthenticatedClientsIdRouteWithChildren,
   AuthenticatedClientsNewRoute: AuthenticatedClientsNewRoute,
   AuthenticatedClientsIndexRoute: AuthenticatedClientsIndexRoute,
+  AuthenticatedClientsIdEditRoute: AuthenticatedClientsIdEditRoute,
+  AuthenticatedClientsIdIndexRoute: AuthenticatedClientsIdIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -500,3 +489,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
