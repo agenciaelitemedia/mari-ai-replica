@@ -197,3 +197,98 @@ function ChatPage() {
     </div>
   )
 }
+
+function LinkToDealButton({ conversationId }: { conversationId: string }) {
+  const qc = useQueryClient()
+  const fetchBoards = useServerFn(listBoards)
+  const fetchBoard = useServerFn(getBoardData)
+  const linkFn = useServerFn(linkConversationToDeal)
+
+  const [open, setOpen] = useState(false)
+  const [boardId, setBoardId] = useState<string>('')
+  const [pipelineId, setPipelineId] = useState<string>('')
+
+  const boardsQ = useQuery({
+    queryKey: ['crm-boards'],
+    queryFn: () => fetchBoards(),
+    enabled: open,
+  })
+
+  useEffect(() => {
+    if (open && !boardId && boardsQ.data?.boards?.[0]) {
+      setBoardId(boardsQ.data.boards[0].id)
+    }
+  }, [open, boardId, boardsQ.data])
+
+  const boardQ = useQuery({
+    queryKey: ['crm-board', boardId],
+    queryFn: () => fetchBoard({ data: { boardId } }),
+    enabled: !!boardId && open,
+  })
+
+  useEffect(() => {
+    if (boardQ.data?.pipelines?.[0] && !pipelineId) {
+      setPipelineId(boardQ.data.pipelines[0].id)
+    }
+  }, [boardQ.data, pipelineId])
+
+  const linkM = useMutation({
+    mutationFn: () => linkFn({ data: { conversationId, boardId, pipelineId } }),
+    onSuccess: (r: any) => {
+      toast.success(r?.reused ? 'Conversa já vinculada a um negócio' : 'Negócio criado e vinculado')
+      setOpen(false)
+      qc.invalidateQueries({ queryKey: ['crm-board', boardId] })
+    },
+    onError: (e: any) => toast.error(e?.message ?? 'Erro ao vincular'),
+  })
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm" variant="outline">
+          <Briefcase className="size-4 mr-1" /> Vincular a Deal
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Vincular conversa a um negócio</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="space-y-1">
+            <Label>Quadro</Label>
+            <Select value={boardId} onValueChange={(v) => { setBoardId(v); setPipelineId('') }}>
+              <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+              <SelectContent>
+                {boardsQ.data?.boards?.map((b: any) => (
+                  <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {boardsQ.data && boardsQ.data.boards.length === 0 && (
+              <p className="text-xs text-muted-foreground">Crie um quadro em CRM primeiro.</p>
+            )}
+          </div>
+          <div className="space-y-1">
+            <Label>Etapa</Label>
+            <Select value={pipelineId} onValueChange={setPipelineId} disabled={!boardId}>
+              <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+              <SelectContent>
+                {boardQ.data?.pipelines?.map((p: any) => (
+                  <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button
+            disabled={!boardId || !pipelineId || linkM.isPending}
+            onClick={() => linkM.mutate()}
+          >
+            Vincular
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
