@@ -169,25 +169,34 @@ export const upsertQueueFull = createServerFn({ method: 'POST' })
     if (!data.id) {
       const { data: client } = await supabaseAdmin
         .from('clients')
-        .select('plan_id')
+        .select('settings, plan_id')
         .eq('id', clientId)
         .maybeSingle()
-      if (client?.plan_id) {
+      
+      let limit = 0
+      // 1. Check client.settings (override)
+      if (client?.settings && typeof client.settings === 'object') {
+        limit = Number((client.settings as any).queues_count || 0)
+      }
+
+      // 2. Check plan.settings if no client override
+      if (limit === 0 && client?.plan_id) {
         const { data: plan } = await supabaseAdmin
           .from('plans')
           .select('settings')
           .eq('id', client.plan_id)
           .maybeSingle()
-        const limit = Number((plan?.settings as any)?.queues_count ?? 0)
-        if (limit > 0) {
-          const { count } = await supabaseAdmin
-            .from('queues')
-            .select('id', { count: 'exact', head: true })
-            .eq('client_id', clientId)
-            .eq('is_deleted', false)
-          if ((count ?? 0) >= limit) {
-            throw new Error(`Limite do plano atingido (${limit} fila(s))`)
-          }
+        limit = Number((plan?.settings as any)?.queues_count ?? 0)
+      }
+
+      if (limit > 0) {
+        const { count } = await supabaseAdmin
+          .from('queues')
+          .select('id', { count: 'exact', head: true })
+          .eq('client_id', clientId)
+          .eq('is_deleted', false)
+        if ((count ?? 0) >= limit) {
+          throw new Error(`Limite do plano atingido (${limit} fila(s))`)
         }
       }
     }
@@ -251,4 +260,43 @@ export const listClientsForSelect = createServerFn({ method: 'GET' })
     const { data, error } = await q
     if (error) throw new Error(error.message)
     return { clients: data ?? [] }
+  })
+
+export const getQueuesUsage = createServerFn({ method: 'GET' })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context
+    const clientId = await getUserClientId(supabase, userId)
+    if (!clientId) return { current: 0, limit: 0 }
+
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+    
+    // Get limit
+    const { data: client } = await supabaseAdmin
+      .from('clients')
+      .select('settings, plan_id')
+      .eq('id', clientId)
+      .maybeSingle()
+    
+    let limit = 0
+    if (client?.settings && typeof client.settings === 'object') {
+      limit = Number((client.settings as any).queues_count || 0)
+    }
+    if (limit === 0 && client?.plan_id) {
+      const { data: plan } = await supabaseAdmin
+        .from('plans')
+        .select('settings')
+        .eq('id', client.plan_id)
+        .maybeSingle()
+      limit = Number((plan?.settings as any)?.queues_count ?? 0)
+    }
+
+    // Get current count
+    const { count } = await supabaseAdmin
+      .from('queues')
+      .select('id', { count: 'exact', head: true })
+      .eq('client_id', clientId)
+      .eq('is_deleted', false)
+
+    return { current: count ?? 0, limit }
   })

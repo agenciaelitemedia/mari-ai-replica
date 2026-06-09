@@ -76,7 +76,7 @@ function SettingsPage() {
               {loadingQ ? (
                 <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary h-8 w-8" /></div>
               ) : (
-                <QueuesList queues={queues} clientsById={clientsById} onEdit={(q) => { setEditingQ(q); setQueueOpen(true) }} onDelete={handleDeleteQ} />
+                <QueuesList queues={queues} onEdit={(q) => { setEditingQ(q); setQueueOpen(true) }} onDelete={handleDeleteQ} />
               )}
             </CardContent>
           </Card>

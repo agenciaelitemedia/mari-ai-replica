@@ -1,52 +1,30 @@
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { PROVIDER_LABELS, type ProviderType } from '@/lib/providers.types'
-import { Pencil, Trash2 } from 'lucide-react'
+import { QueueCard } from './QueueCard'
 
 interface Props {
   queues: any[]
-  clientsById: Record<string, string>
   onEdit: (q: any) => void
   onDelete: (id: string) => void
 }
 
-export function QueuesList({ queues, clientsById, onEdit, onDelete }: Props) {
-  if (queues.length === 0)
-    return <p className="text-sm text-muted-foreground p-8 text-center">Nenhuma fila cadastrada.</p>
+export function QueuesList({ queues, onEdit, onDelete }: Props) {
+  if (queues.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-12 text-center bg-muted/20 rounded-2xl border-2 border-dashed border-muted/50">
+        <div className="p-4 bg-muted/50 rounded-full mb-4">
+          <svg className="w-8 h-8 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+          </svg>
+        </div>
+        <p className="text-lg font-medium text-muted-foreground">Nenhuma fila cadastrada</p>
+        <p className="text-sm text-muted-foreground mt-1">Comece criando sua primeira fila de atendimento.</p>
+      </div>
+    )
+  }
+
   return (
-    <div className="grid gap-3">
+    <div className="grid gap-4">
       {queues.map((q) => (
-        <Card key={q.id} className="p-4 flex items-center justify-between flex-wrap gap-3">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 flex-wrap">
-              <p className="font-semibold">{q.name}</p>
-              {q.provider?.provider_type && (
-                <Badge variant="secondary">
-                  {PROVIDER_LABELS[q.provider.provider_type as ProviderType] ?? q.provider.provider_type}
-                </Badge>
-              )}
-              {q.is_active ? (
-                <Badge className="bg-emerald-500/15 text-emerald-700 border-emerald-500/20">Ativa</Badge>
-              ) : (
-                <Badge variant="outline">Inativa</Badge>
-              )}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Cliente: {clientsById[q.client_id] ?? q.client_id}
-              {q.provider?.name ? ` • Provedor: ${q.provider.name}` : ''}
-              {q.phone_number ? ` • ${q.phone_number}` : ''}
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <Button size="sm" variant="outline" onClick={() => onEdit(q)}>
-              <Pencil className="h-4 w-4 mr-1" /> Editar
-            </Button>
-            <Button size="sm" variant="outline" className="text-destructive" onClick={() => onDelete(q.id)}>
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
-        </Card>
+        <QueueCard key={q.id} queue={q} onEdit={onEdit} onDelete={onDelete} />
       ))}
     </div>
   )

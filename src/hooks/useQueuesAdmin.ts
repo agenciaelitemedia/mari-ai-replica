@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useServerFn } from '@tanstack/react-start'
 import { toast } from 'sonner'
-import { listQueuesFull, upsertQueueFull, deleteQueueFull, listClientsForSelect } from '@/lib/providers.functions'
+import { listQueuesFull, upsertQueueFull, deleteQueueFull, listClientsForSelect, getQueuesUsage } from '@/lib/providers.functions'
 
 export function useQueuesAdmin() {
   const qc = useQueryClient()
@@ -9,6 +9,7 @@ export function useQueuesAdmin() {
   const upsert = useServerFn(upsertQueueFull)
   const remove = useServerFn(deleteQueueFull)
   const listClients = useServerFn(listClientsForSelect)
+  const getUsage = useServerFn(getQueuesUsage)
 
   const queuesQ = useQuery({
     queryKey: ['queues-full'],
@@ -20,12 +21,18 @@ export function useQueuesAdmin() {
     queryFn: () => listClients(),
   })
 
+  const usageQ = useQuery({
+    queryKey: ['queues-usage'],
+    queryFn: () => getUsage(),
+  })
+
   const save = useMutation({
     mutationFn: (input: any) => upsert({ data: input }),
     onSuccess: () => {
       toast.success('Fila salva')
       qc.invalidateQueries({ queryKey: ['queues-full'] })
       qc.invalidateQueries({ queryKey: ['queues'] })
+      qc.invalidateQueries({ queryKey: ['queues-usage'] })
     },
     onError: (e: any) => toast.error(e?.message ?? 'Erro ao salvar'),
   })
@@ -35,6 +42,7 @@ export function useQueuesAdmin() {
     onSuccess: () => {
       toast.success('Fila excluída')
       qc.invalidateQueries({ queryKey: ['queues-full'] })
+      qc.invalidateQueries({ queryKey: ['queues-usage'] })
     },
     onError: (e: any) => toast.error(e?.message ?? 'Erro ao excluir'),
   })
@@ -47,5 +55,7 @@ export function useQueuesAdmin() {
     isSaving: save.isPending,
     remove: del.mutate,
     isRemoving: del.isPending,
+    usage: usageQ.data ?? { current: 0, limit: 0 },
+    isUsageLoading: usageQ.isLoading,
   }
 }
