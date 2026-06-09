@@ -2,6 +2,17 @@
 
 Este projeto é uma migração faseada de [agenciaelitemedia/appjulia](https://github.com/agenciaelitemedia/appjulia) (Vite + React 18 + React Router + Tailwind v3) para a stack moderna Lovable (TanStack Start v1 + React 19 + Vite 7 + Tailwind v4 + Cloudflare Workers + Lovable Cloud).
 
+## Fase 2 — Chat/WhatsApp concluída ✅
+
+- Tabelas novas: `chat_conversations` (com protocolo automático), `chat_conversation_history`, `chat_tags`, `chat_conversation_tags`, `chat_departments`, `chat_message_reactions`, `queues` (instâncias UazAPI/WABA), `queue_providers`.
+- `chat_messages` estendida com `conversation_id`, `internal_note`, `sender_name`.
+- Realtime habilitado em `chat_conversations`.
+- Server functions (`src/lib/chat.functions.ts`): `listConversations`, `listMessages`, `sendMessage` (envia via UazAPI `POST /send/text` quando há fila configurada), `listQueues`, `upsertQueue`.
+- Webhook público UazAPI: `src/routes/api/public/webhooks/uazapi.ts` — verifica token da fila, faz upsert de contato, abre conversa se não existir e grava mensagem; URL pública: `https://project--{id}.lovable.app/api/public/webhooks/uazapi?queue_id=...&token=...`.
+- UI `/chat` com lista de conversas + thread + envio + realtime (`postgres_changes`).
+- UI `/configuracoes` para cadastrar instâncias UazAPI (URL, token, instance, número) e exibe o webhook a configurar no painel UazAPI.
+
+
 ## Fase 1 — concluída ✅
 
 - Lovable Cloud habilitado (banco PostgreSQL + Auth + Storage gerenciados).
