@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet, redirect, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import * as LucideIcons from "lucide-react";
-import { LogOut } from "lucide-react";
+import { LogOut, Sparkles } from "lucide-react";
+import { getIcon } from "@/lib/iconMap";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
