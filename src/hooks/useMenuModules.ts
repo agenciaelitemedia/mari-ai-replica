@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import type { Module } from '@/types/permissions';
+import { useMemo } from 'react';
 
 export interface MenuModule extends Module {
   icon: string | null;
@@ -16,7 +17,7 @@ export interface GroupedMenuModules {
 }
 
 export function useMenuModules() {
-  const { isAdmin, hasPermission, user } = useAuth();
+  const { isAdmin, isSuperAdmin, hasPermission, user } = useAuth();
 
   const { data: modules = [], isLoading, error } = useQuery({
     queryKey: ['menu-modules'],
@@ -27,6 +28,7 @@ export function useMenuModules() {
         .eq('is_active', true)
         .order('display_order', { ascending: true });
       
+      console.log('Modules fetched:', data?.length);
       if (error) throw error;
       return data as MenuModule[];
     },
@@ -36,22 +38,28 @@ export function useMenuModules() {
   });
 
   // Filter modules based on permissions
-  const filteredModules = modules.filter((mod) => {
-    // Only show visible modules
-    if (mod.is_menu_visible === false) return false;
-    
-    // Check if user has view permission for this module
-    // If it's superadmin, hasPermission will return true
-    return hasPermission(mod.code, 'view');
-  });
+  const filteredModules = useMemo(() => {
+    return modules.filter((mod) => {
+      // Only show visible modules
+      if (mod.is_menu_visible === false) return false;
+      
+      // Superadmin sees everything
+      if (isSuperAdmin) return true;
+      
+      // Check if user has view permission for this module
+      return hasPermission(mod.code, 'view');
+    });
+  }, [modules, hasPermission, isSuperAdmin]);
 
   // Group modules by menu_group
-  const groupedModules = filteredModules.reduce<GroupedMenuModules>((acc, mod) => {
-    const group = mod.menu_group || 'OUTROS';
-    if (!acc[group]) acc[group] = [];
-    acc[group].push(mod);
-    return acc;
-  }, {});
+  const groupedModules = useMemo(() => {
+    return filteredModules.reduce<GroupedMenuModules>((acc, mod) => {
+      const group = mod.menu_group || 'OUTROS';
+      if (!acc[group]) acc[group] = [];
+      acc[group].push(mod);
+      return acc;
+    }, {});
+  }, [filteredModules]);
 
   return {
     modules: filteredModules,

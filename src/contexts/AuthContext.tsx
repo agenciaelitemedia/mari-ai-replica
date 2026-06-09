@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import type { UserPermission } from '@/types/permissions';
 import { useQuery } from '@tanstack/react-query';
+import { useMemo } from 'react';
 
 interface AuthContextType {
   user: User | null;
@@ -21,12 +22,13 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<any>(null);
+  const [userRoles, setUserRoles] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const { data: permissions = [], refetch: refetchPermissions } = useQuery({
     queryKey: ['user-permissions', user?.id, profile?.use_custom_permissions],
     queryFn: async () => {
-      if (!user) return [];
+      if (!user || isSuperAdmin) return [];
 
       // 1. Get user roles
       const { data: roles } = await supabase
@@ -99,12 +101,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const refreshProfile = useCallback(async () => {
     if (!user) return;
-    const { data } = await supabase
-      .from('profiles')
-      .select('*, user_roles(role)')
-      .eq('id', user.id)
-      .maybeSingle();
-    setProfile(data);
+    
+    // Fetch profile and roles in parallel
+    const [profileRes, rolesRes] = await Promise.all([
+      supabase.from('profiles').select('*').eq('id', user.id).maybeSingle(),
+      supabase.from('user_roles').select('role').eq('user_id', user.id)
+    ]);
+
+    if (profileRes.error) console.error('Profile fetch error:', profileRes.error);
+    if (rolesRes.error) console.error('Roles fetch error:', rolesRes.error);
+
+    if (profileRes.data) setProfile(profileRes.data);
+    if (rolesRes.data) {
+      const roles = rolesRes.data.map(r => r.role);
+      console.log('User roles loaded:', roles);
+      setUserRoles(roles);
+    }
   }, [user]);
 
   useEffect(() => {
@@ -134,12 +146,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await supabase.auth.signOut();
   };
 
-  const userRoles = profile?.user_roles?.map((r: any) => r.role) || [];
-  const isAdmin = userRoles.includes('admin') || userRoles.includes('superadmin');
-  const isSuperAdmin = userRoles.includes('superadmin');
+  const isAdmin = useMemo(() => userRoles.includes('admin') || userRoles.includes('superadmin'), [userRoles]);
+  const isSuperAdmin = useMemo(() => userRoles.includes('superadmin'), [userRoles]);
 
   const hasPermission = useCallback((moduleCode: string, action: 'view' | 'create' | 'edit' | 'delete' = 'view') => {
     if (isSuperAdmin) return true;
+    
     const perm = permissions.find(p => p.module_code === moduleCode);
     if (!perm) return false;
     
