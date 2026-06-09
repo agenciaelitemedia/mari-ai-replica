@@ -980,17 +980,26 @@ export type Database = {
           evo_url: string | null
           id: string
           ig_business_id: string | null
+          instagram_page_id: string | null
+          instagram_user_id: string | null
           instance_name: string | null
           is_active: boolean
+          meta_app_id: string | null
+          meta_app_secret: string | null
           metadata: Json | null
           name: string
+          page_access_token: string | null
           page_id: string | null
+          page_name: string | null
           phone_number: string | null
           phone_number_id: string | null
           provider_type: string
           updated_at: string
           verify_token: string | null
+          waba_business_id: string | null
           waba_id: string | null
+          waba_token: string | null
+          webchat_config_id: string | null
           widget_key: string | null
         }
         Insert: {
@@ -1003,17 +1012,26 @@ export type Database = {
           evo_url?: string | null
           id?: string
           ig_business_id?: string | null
+          instagram_page_id?: string | null
+          instagram_user_id?: string | null
           instance_name?: string | null
           is_active?: boolean
+          meta_app_id?: string | null
+          meta_app_secret?: string | null
           metadata?: Json | null
           name: string
+          page_access_token?: string | null
           page_id?: string | null
+          page_name?: string | null
           phone_number?: string | null
           phone_number_id?: string | null
           provider_type?: string
           updated_at?: string
           verify_token?: string | null
+          waba_business_id?: string | null
           waba_id?: string | null
+          waba_token?: string | null
+          webchat_config_id?: string | null
           widget_key?: string | null
         }
         Update: {
@@ -1026,17 +1044,26 @@ export type Database = {
           evo_url?: string | null
           id?: string
           ig_business_id?: string | null
+          instagram_page_id?: string | null
+          instagram_user_id?: string | null
           instance_name?: string | null
           is_active?: boolean
+          meta_app_id?: string | null
+          meta_app_secret?: string | null
           metadata?: Json | null
           name?: string
+          page_access_token?: string | null
           page_id?: string | null
+          page_name?: string | null
           phone_number?: string | null
           phone_number_id?: string | null
           provider_type?: string
           updated_at?: string
           verify_token?: string | null
+          waba_business_id?: string | null
           waba_id?: string | null
+          waba_token?: string | null
+          webchat_config_id?: string | null
           widget_key?: string | null
         }
         Relationships: []
