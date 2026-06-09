@@ -6,9 +6,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Pencil, User, Building2, CreditCard, Copy, Check, Loader2 } from 'lucide-react';
+import { ArrowLeft, Pencil, User, Building2, CreditCard, Copy, Check, Loader2, X } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { maskCpfCnpj, maskPhone, maskCep } from '@/lib/br-utils';
 
 export const Route = createFileRoute('/_authenticated/clients/$id')({
   component: ClientDetailPage,
@@ -44,14 +45,42 @@ function ClientDetailPage() {
   if (isLoading || !client) return <div className="p-12 flex justify-center"><Loader2 className="animate-spin h-8 w-8 text-primary" /></div>;
 
   const addr = client.settings?.address || {};
-  const fullAddress = [addr.street, addr.number, addr.neighborhood, addr.city, addr.state].filter(Boolean).join(', ');
+  const cepFmt = addr.cep ? maskCep(addr.cep) : '';
+  const fullAddress = [
+    addr.street,
+    addr.number,
+    addr.complement,
+    addr.neighborhood,
+    [addr.city, addr.state].filter(Boolean).join('/'),
+    cepFmt,
+  ].filter(Boolean).join(', ');
 
+  const [copyError, setCopyError] = useState(false);
   const copyPwd = async () => {
     if (!client.temporary_password) return;
-    await navigator.clipboard.writeText(client.temporary_password);
-    setCopied(true);
-    toast.success('Senha copiada');
-    setTimeout(() => setCopied(false), 1500);
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(client.temporary_password);
+      } else {
+        const ta = document.createElement('textarea');
+        ta.value = client.temporary_password;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        const ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        if (!ok) throw new Error('Falha ao copiar');
+      }
+      setCopied(true);
+      setCopyError(false);
+      toast.success('Senha copiada para a área de transferência');
+      setTimeout(() => setCopied(false), 1800);
+    } catch {
+      setCopyError(true);
+      toast.error('Não foi possível copiar. Copie manualmente.');
+      setTimeout(() => setCopyError(false), 2200);
+    }
   };
 
   return (
