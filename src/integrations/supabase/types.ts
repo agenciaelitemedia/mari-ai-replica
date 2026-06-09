@@ -399,7 +399,6 @@ export type Database = {
           photo: string | null
           plan_id: string | null
           settings: Json | null
-          temporary_password: string | null
           updated_at: string | null
         }
         Insert: {
@@ -414,7 +413,6 @@ export type Database = {
           photo?: string | null
           plan_id?: string | null
           settings?: Json | null
-          temporary_password?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -429,7 +427,6 @@ export type Database = {
           photo?: string | null
           plan_id?: string | null
           settings?: Json | null
-          temporary_password?: string | null
           updated_at?: string | null
         }
         Relationships: [

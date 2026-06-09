@@ -11,7 +11,6 @@ export interface Client {
   phone: string | null;
   plan_id: string | null;
   settings: any;
-  temporary_password?: string | null;
   created_at: string | null;
 }
 
@@ -22,7 +21,6 @@ export interface ClientFormData {
   phone: string;
   plan_id: string | null;
   settings: any;
-  temporary_password?: string;
 }
 
 export function useClientsAdmin() {
@@ -44,22 +42,11 @@ export function useClientsAdmin() {
 
   const createClientMutation = useMutation({
     mutationFn: async (clientData: ClientFormData) => {
-      // Validar se email já existe
-      const { data: existingClient, error: checkError } = await supabase
-        .from('clients')
-        .select('id')
-        .eq('email', clientData.email)
-        .maybeSingle();
-      
-      if (checkError) throw checkError;
-      if (existingClient) throw new Error("Este email já está cadastrado em nossa base.");
-
       const { data, error } = await supabase
         .from('clients')
         .insert(clientData)
         .select()
         .single();
-      
       if (error) throw error;
       return data;
     },

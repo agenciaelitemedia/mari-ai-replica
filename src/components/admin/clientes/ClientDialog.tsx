@@ -44,7 +44,6 @@ export function ClientDialog({ open, onClose, client, onSave, isLoading }: Clien
       phone: "",
       plan_id: null,
       settings: {},
-      temporary_password: "",
     },
   });
 
@@ -57,12 +56,8 @@ export function ClientDialog({ open, onClose, client, onSave, isLoading }: Clien
         phone: client.phone || "",
         plan_id: client.plan_id,
         settings: client.settings || {},
-        temporary_password: client.temporary_password || "",
       });
     } else {
-      const randomNum = Math.floor(1000 + Math.random() * 9000);
-      const generatedPassword = `Maria@${randomNum}`;
-      
       form.reset({
         name: "",
         business_name: "",
@@ -70,7 +65,6 @@ export function ClientDialog({ open, onClose, client, onSave, isLoading }: Clien
         phone: "",
         plan_id: null,
         settings: {},
-        temporary_password: generatedPassword,
       });
     }
     setActiveTab("data");
@@ -91,7 +85,7 @@ export function ClientDialog({ open, onClose, client, onSave, isLoading }: Clien
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl h-[90vh] rounded-3xl border-border/40 bg-card/95 backdrop-blur-2xl shadow-2xl p-0 gap-0 flex flex-col overflow-hidden">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl border-border/40 bg-card/95 backdrop-blur-2xl shadow-2xl p-0 gap-0">
         <DialogHeader className="p-8 pb-4">
           <DialogTitle className="text-2xl font-bold tracking-tight">
             {client ? "Editar Cliente" : "Novo Cliente"}
@@ -102,8 +96,8 @@ export function ClientDialog({ open, onClose, client, onSave, isLoading }: Clien
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="flex-1 flex flex-col overflow-hidden">
-            <div className="px-8 flex-1 overflow-y-auto">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <div className="px-8">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsList className="grid w-full grid-cols-4 bg-muted/50 p-1 rounded-xl mb-6">
                   <TabsTrigger value="data" className="rounded-lg gap-2">
@@ -125,46 +119,11 @@ export function ClientDialog({ open, onClose, client, onSave, isLoading }: Clien
                     <FormField
                       control={form.control}
                       name="name"
-                      rules={{ required: "Nome é obrigatório" }}
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-semibold text-primary/80">Nome Completo *</FormLabel>
+                          <FormLabel className="text-sm font-semibold">Nome Completo</FormLabel>
                           <FormControl>
-                            <Input placeholder="Nome do cliente" {...field} className="rounded-xl border-border/60 bg-background/50 h-12" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="email"
-                      rules={{ 
-                        required: "Email é obrigatório",
-                        pattern: {
-                          value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                          message: "Email inválido"
-                        }
-                      }}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm font-semibold text-primary/80">Email Principal *</FormLabel>
-                          <FormControl>
-                            <Input placeholder="email@empresa.com" type="email" {...field} className="rounded-xl border-border/60 bg-background/50 h-12" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="phone"
-                      rules={{ required: "Telefone é obrigatório" }}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm font-semibold text-primary/80">Telefone / WhatsApp *</FormLabel>
-                          <FormControl>
-                            <Input placeholder="(00) 00000-0000" {...field} className="rounded-xl border-border/60 bg-background/50 h-12" />
+                            <Input placeholder="Nome do cliente" {...field} className="rounded-xl border-border/60 bg-background/50" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -175,9 +134,37 @@ export function ClientDialog({ open, onClose, client, onSave, isLoading }: Clien
                       name="business_name"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-sm font-semibold text-primary/80">Nome da Empresa</FormLabel>
+                          <FormLabel className="text-sm font-semibold">Nome da Empresa</FormLabel>
                           <FormControl>
-                            <Input placeholder="Razão social ou nome fantasia" {...field} className="rounded-xl border-border/60 bg-background/50 h-12" />
+                            <Input placeholder="Razão social ou nome fantasia" {...field} className="rounded-xl border-border/60 bg-background/50" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-semibold">Email Principal</FormLabel>
+                          <FormControl>
+                            <Input placeholder="email@empresa.com" type="email" {...field} className="rounded-xl border-border/60 bg-background/50" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="phone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm font-semibold">Telefone / WhatsApp</FormLabel>
+                          <FormControl>
+                            <Input placeholder="(00) 00000-0000" {...field} className="rounded-xl border-border/60 bg-background/50" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -232,63 +219,9 @@ export function ClientDialog({ open, onClose, client, onSave, isLoading }: Clien
                 </TabsContent>
 
                 <TabsContent value="user" className="py-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-                    <div className="space-y-4">
-                      <FormItem>
-                        <FormLabel className="text-sm font-semibold text-primary/80">Usuário / Login</FormLabel>
-                        <FormControl>
-                          <Input 
-                            value={form.watch("email")} 
-                            disabled 
-                            className="rounded-xl border-border/60 bg-muted/30 h-12 italic" 
-                          />
-                        </FormControl>
-                        <p className="text-[10px] text-muted-foreground">O email do cliente será utilizado como login de acesso.</p>
-                      </FormItem>
-
-                      <FormField
-                        control={form.control}
-                        name="temporary_password"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-sm font-semibold text-primary/80">Senha de Acesso</FormLabel>
-                            <FormControl>
-                              <div className="relative">
-                                <Input 
-                                  {...field} 
-                                  className="rounded-xl border-border/60 bg-background/50 h-12 pr-10 font-mono" 
-                                  placeholder="Maria@1234"
-                                />
-                                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                                  <User className="h-4 w-4" />
-                                </div>
-                              </div>
-                            </FormControl>
-                            <p className="text-[10px] text-muted-foreground">Esta senha será mantida até que o usuário realize a alteração.</p>
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-
-                    <div className="bg-primary/5 border border-primary/10 rounded-2xl p-6 space-y-4">
-                      <div className="flex items-center gap-3 text-primary">
-                        <User className="h-5 w-5" />
-                        <h4 className="font-bold">Informações de Acesso</h4>
-                      </div>
-                      <p className="text-sm text-muted-foreground leading-relaxed">
-                        Ao salvar o cliente, um usuário será automaticamente provisionado no sistema com as credenciais acima.
-                      </p>
-                      <div className="pt-2">
-                        <div className="flex justify-between text-xs py-2 border-b border-primary/10">
-                          <span className="text-muted-foreground">Tipo de Conta:</span>
-                          <span className="font-semibold">Cliente SaaS</span>
-                        </div>
-                        <div className="flex justify-between text-xs py-2">
-                          <span className="text-muted-foreground">Status:</span>
-                          <span className="text-emerald-500 font-bold">Aguardando Criação</span>
-                        </div>
-                      </div>
-                    </div>
+                  <div className="p-8 text-center border-2 border-dashed border-border/40 rounded-2xl">
+                    <User className="h-10 w-10 mx-auto mb-4 text-muted-foreground/40" />
+                    <p className="text-sm text-muted-foreground font-medium">Gestão de usuários vinculados ao cliente será liberada na próxima fase.</p>
                   </div>
                 </TabsContent>
               </Tabs>
