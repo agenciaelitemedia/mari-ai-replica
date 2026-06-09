@@ -386,6 +386,45 @@ export type Database = {
         }
         Relationships: []
       }
+      clients: {
+        Row: {
+          business_name: string | null
+          created_at: string | null
+          email: string | null
+          federal_id: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          phone: string | null
+          photo: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          business_name?: string | null
+          created_at?: string | null
+          email?: string | null
+          federal_id?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          phone?: string | null
+          photo?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          business_name?: string | null
+          created_at?: string | null
+          email?: string | null
+          federal_id?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          phone?: string | null
+          photo?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       crm_boards: {
         Row: {
           cod_agent: string
@@ -702,9 +741,96 @@ export type Database = {
           },
         ]
       }
+      module_embeds: {
+        Row: {
+          created_at: string | null
+          embed_url: string
+          id: string
+          module_id: string
+          settings: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          embed_url: string
+          id?: string
+          module_id: string
+          settings?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          embed_url?: string
+          id?: string
+          module_id?: string
+          settings?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_embeds_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: true
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      modules: {
+        Row: {
+          category: string | null
+          code: string
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          is_menu_visible: boolean | null
+          menu_group: string | null
+          module_type: string | null
+          name: string
+          route: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          category?: string | null
+          code: string
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_menu_visible?: boolean | null
+          menu_group?: string | null
+          module_type?: string | null
+          name: string
+          route?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string | null
+          code?: string
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_menu_visible?: boolean | null
+          menu_group?: string | null
+          module_type?: string | null
+          name?: string
+          route?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
+          client_id: string | null
           cod_agent: string | null
           created_at: string
           email: string | null
@@ -713,9 +839,11 @@ export type Database = {
           is_active: boolean
           phone: string | null
           updated_at: string
+          use_custom_permissions: boolean | null
         }
         Insert: {
           avatar_url?: string | null
+          client_id?: string | null
           cod_agent?: string | null
           created_at?: string
           email?: string | null
@@ -724,9 +852,11 @@ export type Database = {
           is_active?: boolean
           phone?: string | null
           updated_at?: string
+          use_custom_permissions?: boolean | null
         }
         Update: {
           avatar_url?: string | null
+          client_id?: string | null
           cod_agent?: string | null
           created_at?: string
           email?: string | null
@@ -735,8 +865,17 @@ export type Database = {
           is_active?: boolean
           phone?: string | null
           updated_at?: string
+          use_custom_permissions?: boolean | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       queue_providers: {
         Row: {
@@ -839,6 +978,94 @@ export type Database = {
           waba_token?: string | null
         }
         Relationships: []
+      }
+      role_default_permissions: {
+        Row: {
+          can_create: boolean | null
+          can_delete: boolean | null
+          can_edit: boolean | null
+          can_view: boolean | null
+          created_at: string | null
+          id: string
+          module_id: string
+          role: string
+          updated_at: string | null
+        }
+        Insert: {
+          can_create?: boolean | null
+          can_delete?: boolean | null
+          can_edit?: boolean | null
+          can_view?: boolean | null
+          created_at?: string | null
+          id?: string
+          module_id: string
+          role: string
+          updated_at?: string | null
+        }
+        Update: {
+          can_create?: boolean | null
+          can_delete?: boolean | null
+          can_edit?: boolean | null
+          can_view?: boolean | null
+          created_at?: string | null
+          id?: string
+          module_id?: string
+          role?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_default_permissions_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_permissions: {
+        Row: {
+          can_create: boolean | null
+          can_delete: boolean | null
+          can_edit: boolean | null
+          can_view: boolean | null
+          created_at: string | null
+          id: string
+          module_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          can_create?: boolean | null
+          can_delete?: boolean | null
+          can_edit?: boolean | null
+          can_view?: boolean | null
+          created_at?: string | null
+          id?: string
+          module_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          can_create?: boolean | null
+          can_delete?: boolean | null
+          can_edit?: boolean | null
+          can_view?: boolean | null
+          created_at?: string | null
+          id?: string
+          module_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_permissions_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
