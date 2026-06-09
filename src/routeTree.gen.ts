@@ -16,6 +16,7 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedCrmRouteImport } from './routes/_authenticated/crm'
 import { Route as AuthenticatedContatosRouteImport } from './routes/_authenticated/contatos'
 import { Route as AuthenticatedChatRouteImport } from './routes/_authenticated/chat'
+import { Route as AuthenticatedAgentesRouteImport } from './routes/_authenticated/agentes'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -51,10 +52,16 @@ const AuthenticatedChatRoute = AuthenticatedChatRouteImport.update({
   path: '/chat',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAgentesRoute = AuthenticatedAgentesRouteImport.update({
+  id: '/agentes',
+  path: '/agentes',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/agentes': typeof AuthenticatedAgentesRoute
   '/chat': typeof AuthenticatedChatRoute
   '/contatos': typeof AuthenticatedContatosRoute
   '/crm': typeof AuthenticatedCrmRoute
@@ -63,6 +70,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/agentes': typeof AuthenticatedAgentesRoute
   '/chat': typeof AuthenticatedChatRoute
   '/contatos': typeof AuthenticatedContatosRoute
   '/crm': typeof AuthenticatedCrmRoute
@@ -73,6 +81,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/agentes': typeof AuthenticatedAgentesRoute
   '/_authenticated/chat': typeof AuthenticatedChatRoute
   '/_authenticated/contatos': typeof AuthenticatedContatosRoute
   '/_authenticated/crm': typeof AuthenticatedCrmRoute
@@ -80,14 +89,22 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/chat' | '/contatos' | '/crm' | '/dashboard'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/agentes'
+    | '/chat'
+    | '/contatos'
+    | '/crm'
+    | '/dashboard'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/chat' | '/contatos' | '/crm' | '/dashboard'
+  to: '/' | '/auth' | '/agentes' | '/chat' | '/contatos' | '/crm' | '/dashboard'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/agentes'
     | '/_authenticated/chat'
     | '/_authenticated/contatos'
     | '/_authenticated/crm'
@@ -151,10 +168,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedChatRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/agentes': {
+      id: '/_authenticated/agentes'
+      path: '/agentes'
+      fullPath: '/agentes'
+      preLoaderRoute: typeof AuthenticatedAgentesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAgentesRoute: typeof AuthenticatedAgentesRoute
   AuthenticatedChatRoute: typeof AuthenticatedChatRoute
   AuthenticatedContatosRoute: typeof AuthenticatedContatosRoute
   AuthenticatedCrmRoute: typeof AuthenticatedCrmRoute
@@ -162,6 +187,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAgentesRoute: AuthenticatedAgentesRoute,
   AuthenticatedChatRoute: AuthenticatedChatRoute,
   AuthenticatedContatosRoute: AuthenticatedContatosRoute,
   AuthenticatedCrmRoute: AuthenticatedCrmRoute,
