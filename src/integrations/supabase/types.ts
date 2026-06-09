@@ -397,6 +397,7 @@ export type Database = {
           name: string
           phone: string | null
           photo: string | null
+          plan_id: string | null
           updated_at: string | null
         }
         Insert: {
@@ -409,6 +410,7 @@ export type Database = {
           name: string
           phone?: string | null
           photo?: string | null
+          plan_id?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -421,9 +423,18 @@ export type Database = {
           name?: string
           phone?: string | null
           photo?: string | null
+          plan_id?: string | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "clients_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       crm_boards: {
         Row: {
@@ -824,6 +835,69 @@ export type Database = {
           name?: string
           route?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      plan_modules: {
+        Row: {
+          created_at: string
+          module_id: string
+          plan_id: string
+        }
+        Insert: {
+          created_at?: string
+          module_id: string
+          plan_id: string
+        }
+        Update: {
+          created_at?: string
+          module_id?: string
+          plan_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_modules_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plan_modules_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plans: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          price: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          price?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          price?: number | null
+          updated_at?: string
         }
         Relationships: []
       }
