@@ -26,7 +26,10 @@ import { Route as AuthenticatedClientsRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedChatRouteImport } from './routes/_authenticated/chat'
 import { Route as AuthenticatedAgentesRouteImport } from './routes/_authenticated/agentes'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedClientsNewRouteImport } from './routes/_authenticated/clients.new'
+import { Route as AuthenticatedClientsIdRouteImport } from './routes/_authenticated/clients.$id'
 import { Route as ApiPublicWebhooksUazapiRouteImport } from './routes/api/public/webhooks/uazapi'
+import { Route as AuthenticatedClientsIdEditRouteImport } from './routes/_authenticated/clients.$id.edit'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -113,11 +116,27 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedClientsNewRoute = AuthenticatedClientsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AuthenticatedClientsRoute,
+} as any)
+const AuthenticatedClientsIdRoute = AuthenticatedClientsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AuthenticatedClientsRoute,
+} as any)
 const ApiPublicWebhooksUazapiRoute = ApiPublicWebhooksUazapiRouteImport.update({
   id: '/api/public/webhooks/uazapi',
   path: '/api/public/webhooks/uazapi',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedClientsIdEditRoute =
+  AuthenticatedClientsIdEditRouteImport.update({
+    id: '/edit',
+    path: '/edit',
+    getParentRoute: () => AuthenticatedClientsIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -125,7 +144,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRoute
   '/agentes': typeof AuthenticatedAgentesRoute
   '/chat': typeof AuthenticatedChatRoute
-  '/clients': typeof AuthenticatedClientsRoute
+  '/clients': typeof AuthenticatedClientsRouteWithChildren
   '/comercial': typeof AuthenticatedComercialRoute
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/contatos': typeof AuthenticatedContatosRoute
@@ -136,6 +155,9 @@ export interface FileRoutesByFullPath {
   '/legal-cases': typeof AuthenticatedLegalCasesRoute
   '/plans': typeof AuthenticatedPlansRoute
   '/telefonia': typeof AuthenticatedTelefoniaRoute
+  '/clients/$id': typeof AuthenticatedClientsIdRouteWithChildren
+  '/clients/new': typeof AuthenticatedClientsNewRoute
+  '/clients/$id/edit': typeof AuthenticatedClientsIdEditRoute
   '/api/public/webhooks/uazapi': typeof ApiPublicWebhooksUazapiRoute
 }
 export interface FileRoutesByTo {
@@ -144,7 +166,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminRoute
   '/agentes': typeof AuthenticatedAgentesRoute
   '/chat': typeof AuthenticatedChatRoute
-  '/clients': typeof AuthenticatedClientsRoute
+  '/clients': typeof AuthenticatedClientsRouteWithChildren
   '/comercial': typeof AuthenticatedComercialRoute
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/contatos': typeof AuthenticatedContatosRoute
@@ -155,6 +177,9 @@ export interface FileRoutesByTo {
   '/legal-cases': typeof AuthenticatedLegalCasesRoute
   '/plans': typeof AuthenticatedPlansRoute
   '/telefonia': typeof AuthenticatedTelefoniaRoute
+  '/clients/$id': typeof AuthenticatedClientsIdRouteWithChildren
+  '/clients/new': typeof AuthenticatedClientsNewRoute
+  '/clients/$id/edit': typeof AuthenticatedClientsIdEditRoute
   '/api/public/webhooks/uazapi': typeof ApiPublicWebhooksUazapiRoute
 }
 export interface FileRoutesById {
@@ -165,7 +190,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/agentes': typeof AuthenticatedAgentesRoute
   '/_authenticated/chat': typeof AuthenticatedChatRoute
-  '/_authenticated/clients': typeof AuthenticatedClientsRoute
+  '/_authenticated/clients': typeof AuthenticatedClientsRouteWithChildren
   '/_authenticated/comercial': typeof AuthenticatedComercialRoute
   '/_authenticated/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/_authenticated/contatos': typeof AuthenticatedContatosRoute
@@ -176,6 +201,9 @@ export interface FileRoutesById {
   '/_authenticated/legal-cases': typeof AuthenticatedLegalCasesRoute
   '/_authenticated/plans': typeof AuthenticatedPlansRoute
   '/_authenticated/telefonia': typeof AuthenticatedTelefoniaRoute
+  '/_authenticated/clients/$id': typeof AuthenticatedClientsIdRouteWithChildren
+  '/_authenticated/clients/new': typeof AuthenticatedClientsNewRoute
+  '/_authenticated/clients/$id/edit': typeof AuthenticatedClientsIdEditRoute
   '/api/public/webhooks/uazapi': typeof ApiPublicWebhooksUazapiRoute
 }
 export interface FileRouteTypes {
@@ -197,6 +225,9 @@ export interface FileRouteTypes {
     | '/legal-cases'
     | '/plans'
     | '/telefonia'
+    | '/clients/$id'
+    | '/clients/new'
+    | '/clients/$id/edit'
     | '/api/public/webhooks/uazapi'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -216,6 +247,9 @@ export interface FileRouteTypes {
     | '/legal-cases'
     | '/plans'
     | '/telefonia'
+    | '/clients/$id'
+    | '/clients/new'
+    | '/clients/$id/edit'
     | '/api/public/webhooks/uazapi'
   id:
     | '__root__'
@@ -236,6 +270,9 @@ export interface FileRouteTypes {
     | '/_authenticated/legal-cases'
     | '/_authenticated/plans'
     | '/_authenticated/telefonia'
+    | '/_authenticated/clients/$id'
+    | '/_authenticated/clients/new'
+    | '/_authenticated/clients/$id/edit'
     | '/api/public/webhooks/uazapi'
   fileRoutesById: FileRoutesById
 }
@@ -367,6 +404,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/clients/new': {
+      id: '/_authenticated/clients/new'
+      path: '/new'
+      fullPath: '/clients/new'
+      preLoaderRoute: typeof AuthenticatedClientsNewRouteImport
+      parentRoute: typeof AuthenticatedClientsRoute
+    }
+    '/_authenticated/clients/$id': {
+      id: '/_authenticated/clients/$id'
+      path: '/$id'
+      fullPath: '/clients/$id'
+      preLoaderRoute: typeof AuthenticatedClientsIdRouteImport
+      parentRoute: typeof AuthenticatedClientsRoute
+    }
     '/api/public/webhooks/uazapi': {
       id: '/api/public/webhooks/uazapi'
       path: '/api/public/webhooks/uazapi'
@@ -374,14 +425,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicWebhooksUazapiRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/clients/$id/edit': {
+      id: '/_authenticated/clients/$id/edit'
+      path: '/edit'
+      fullPath: '/clients/$id/edit'
+      preLoaderRoute: typeof AuthenticatedClientsIdEditRouteImport
+      parentRoute: typeof AuthenticatedClientsIdRoute
+    }
   }
 }
+
+interface AuthenticatedClientsIdRouteChildren {
+  AuthenticatedClientsIdEditRoute: typeof AuthenticatedClientsIdEditRoute
+}
+
+const AuthenticatedClientsIdRouteChildren: AuthenticatedClientsIdRouteChildren =
+  {
+    AuthenticatedClientsIdEditRoute: AuthenticatedClientsIdEditRoute,
+  }
+
+const AuthenticatedClientsIdRouteWithChildren =
+  AuthenticatedClientsIdRoute._addFileChildren(
+    AuthenticatedClientsIdRouteChildren,
+  )
+
+interface AuthenticatedClientsRouteChildren {
+  AuthenticatedClientsIdRoute: typeof AuthenticatedClientsIdRouteWithChildren
+  AuthenticatedClientsNewRoute: typeof AuthenticatedClientsNewRoute
+}
+
+const AuthenticatedClientsRouteChildren: AuthenticatedClientsRouteChildren = {
+  AuthenticatedClientsIdRoute: AuthenticatedClientsIdRouteWithChildren,
+  AuthenticatedClientsNewRoute: AuthenticatedClientsNewRoute,
+}
+
+const AuthenticatedClientsRouteWithChildren =
+  AuthenticatedClientsRoute._addFileChildren(AuthenticatedClientsRouteChildren)
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedAgentesRoute: typeof AuthenticatedAgentesRoute
   AuthenticatedChatRoute: typeof AuthenticatedChatRoute
-  AuthenticatedClientsRoute: typeof AuthenticatedClientsRoute
+  AuthenticatedClientsRoute: typeof AuthenticatedClientsRouteWithChildren
   AuthenticatedComercialRoute: typeof AuthenticatedComercialRoute
   AuthenticatedConfiguracoesRoute: typeof AuthenticatedConfiguracoesRoute
   AuthenticatedContatosRoute: typeof AuthenticatedContatosRoute
@@ -398,7 +483,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedAgentesRoute: AuthenticatedAgentesRoute,
   AuthenticatedChatRoute: AuthenticatedChatRoute,
-  AuthenticatedClientsRoute: AuthenticatedClientsRoute,
+  AuthenticatedClientsRoute: AuthenticatedClientsRouteWithChildren,
   AuthenticatedComercialRoute: AuthenticatedComercialRoute,
   AuthenticatedConfiguracoesRoute: AuthenticatedConfiguracoesRoute,
   AuthenticatedContatosRoute: AuthenticatedContatosRoute,
@@ -423,3 +508,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
