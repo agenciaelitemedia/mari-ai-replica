@@ -1,29 +1,25 @@
-## UI/UX Enhancement Plan
+## Problema
 
-The current interface is clean but can be further polished to achieve a more modern, premium look inspired by the provided reference (helenacrm.com).
+Na etapa "Módulos" do wizard de criação/edição de plano, clicar no card ou no checkbox não marca nada. A causa é um **duplo disparo**: o `onClick` do card e o `onCheckedChange` do `Checkbox` são acionados no mesmo clique (o evento sobe do checkbox para o card), alternando o valor duas vezes — resultado líquido: nenhuma mudança.
 
-### Key Improvements:
-1. **Refined Typography & Spacing:**
-   - Standardize font sizing, letter spacing, and line heights for better legibility.
-   - Adjust layout paddings and gaps to create a consistent, more breathable grid system.
+## Correção
 
-2. **Component Polishing:**
-   - **Cards:** Enhance cards with subtle gradients, increased border-radius, and refined shadow/border effects for a depth-oriented, premium aesthetic.
-   - **Buttons:** Refine button styles (size, hover transitions, shadow) to be more reactive and consistent.
-   - **Inputs/Tables:** Standardize input field visuals and table padding/hover states to be cleaner.
-   - **Badges:** Slightly soften badge corners or update background/text contrast.
+Editar apenas `src/components/admin/planos/PlanDialog.tsx`, na renderização dos cards de módulo (etapa "Módulos"):
 
-3. **Visual Cues & Feedback:**
-   - Enhance hover/active states across interactive elements for smoother micro-interactions.
-   - Ensure loading and empty states are polished and consistent with the new design language.
+1. **Manter o `onClick` apenas no card** como único responsável por alternar a seleção.
+2. **Tornar o `Checkbox` inerte ao clique**, deixando-o como indicador visual:
+   - Remover o `onCheckedChange={() => toggleModule(mod.id)}` que foi adicionado.
+   - Adicionar `className="pointer-events-none"` e `tabIndex={-1}` ao Checkbox.
+3. Garantir que `checked` continue lendo via `form.watch('module_ids')` para re-render imediato.
+4. Confirmar que `toggleModule` usa `form.getValues` (estado fresco) e `form.setValue(..., { shouldValidate: true, shouldDirty: true })`.
 
-4. **Consistency:**
-   - Apply a more robust and uniform spacing/sizing theme across `src/components/ui` components while respecting the current `tailwind.config.ts`.
+Nada mais muda: o botão "Selecionar Todos / Desmarcar Todos" por categoria, o contador no topo, a validação mínima de 1 módulo e a persistência em `plan_modules` permanecem como estão.
 
-### Implementation:
-- Edit core `ui` components (`Button`, `Card`, `Input`, `Badge`) to refine their design definitions.
-- Update global CSS styles in `src/styles.css` if necessary for subtle refinements.
-- Apply utility classes to key pages (e.g., dashboard, lists) to enforce the improved layout consistency.
+## Verificação
 
-### Execution:
-- I will perform these updates in iterative batches to ensure the visual impact is controlled and consistent across the whole application.
+Após a edição, abrir o wizard, avançar até a etapa Módulos e validar:
+- Clicar no card marca/desmarca uma única vez.
+- Clicar diretamente sobre o ícone do checkbox também marca uma única vez (via bubble para o card).
+- Contador no topo reflete a quantidade real.
+- Botão "Selecionar Todos" continua funcionando.
+- Salvar persiste todos os módulos escolhidos no plano.
