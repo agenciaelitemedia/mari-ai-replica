@@ -888,6 +888,7 @@ export type Database = {
           price_annual: number | null
           price_quarterly: number | null
           price_semiannual: number | null
+          settings: Json | null
           updated_at: string
         }
         Insert: {
@@ -900,6 +901,7 @@ export type Database = {
           price_annual?: number | null
           price_quarterly?: number | null
           price_semiannual?: number | null
+          settings?: Json | null
           updated_at?: string
         }
         Update: {
@@ -912,6 +914,7 @@ export type Database = {
           price_annual?: number | null
           price_quarterly?: number | null
           price_semiannual?: number | null
+          settings?: Json | null
           updated_at?: string
         }
         Relationships: []

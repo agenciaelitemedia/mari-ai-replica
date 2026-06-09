@@ -12,6 +12,10 @@ export interface Plan {
   price_semiannual: number;
   price_annual: number;
   is_active: boolean;
+  settings?: {
+    queues_count?: number;
+    [key: string]: any;
+  } | null;
   created_at: string;
   updated_at: string;
   module_ids?: string[];
@@ -25,6 +29,9 @@ export interface PlanFormData {
   price_semiannual: number;
   price_annual: number;
   is_active: boolean;
+  settings?: {
+    queues_count: number;
+  };
   module_ids: string[];
 }
 
