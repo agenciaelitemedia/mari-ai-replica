@@ -511,21 +511,27 @@ export function PlanDialog({ open, onClose, plan, onSave, isLoading }: PlanDialo
                                         <Puzzle className="w-6 h-6" />
                                       </div>
                                       <div className="flex-1 min-w-0">
-                                        <label className={cn(
-                                          "text-base font-black leading-tight cursor-pointer transition-colors block truncate",
+                                        <span className={cn(
+                                          "text-base font-black leading-tight transition-colors block truncate",
                                           isSelected ? "text-foreground" : "text-muted-foreground group-hover:text-foreground"
                                         )}>
                                           {mod.name}
-                                        </label>
+                                        </span>
                                         <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1 opacity-60">
                                           CODE: {mod.code}
                                         </p>
                                       </div>
-                                      <Checkbox
-                                        checked={isSelected}
-                                        tabIndex={-1}
-                                        className="h-6 w-6 rounded-lg data-[state=checked]:bg-primary border-2 border-border/40 pointer-events-none"
-                                      />
+                                      <div
+                                        aria-hidden="true"
+                                        className={cn(
+                                          "h-6 w-6 rounded-lg border-2 flex items-center justify-center shrink-0 transition-colors",
+                                          isSelected
+                                            ? "bg-primary border-primary text-primary-foreground"
+                                            : "bg-transparent border-border/40"
+                                        )}
+                                      >
+                                        {isSelected && <Check className="h-4 w-4 stroke-[3px]" />}
+                                      </div>
                                     </div>
                                   );
                                 })}
