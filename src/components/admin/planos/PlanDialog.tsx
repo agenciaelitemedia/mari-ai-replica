@@ -523,8 +523,8 @@ export function PlanDialog({ open, onClose, plan, onSave, isLoading }: PlanDialo
                                       </div>
                                       <Checkbox
                                         checked={isSelected}
-                                        onCheckedChange={() => toggleModule(mod.id)}
-                                        className="h-6 w-6 rounded-lg data-[state=checked]:bg-primary border-2 border-border/40 transition-transform active:scale-90"
+                                        tabIndex={-1}
+                                        className="h-6 w-6 rounded-lg data-[state=checked]:bg-primary border-2 border-border/40 pointer-events-none"
                                       />
                                     </div>
                                   );
