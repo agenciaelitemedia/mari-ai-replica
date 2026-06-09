@@ -3,7 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ClientsManagement } from '@/components/admin/clientes/ClientsManagement';
 
-export const Route = createFileRoute('/_authenticated/clients')({
+export const Route = createFileRoute('/_authenticated/clients/')({
   component: ClientsPage,
 });
 
