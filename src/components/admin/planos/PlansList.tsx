@@ -25,7 +25,10 @@ export function PlansList({ plans, onEdit, onDelete, isDeleting }: PlansListProp
         <TableHeader>
           <TableRow>
             <TableHead>Nome</TableHead>
-            <TableHead>Preço</TableHead>
+            <TableHead>Mensal</TableHead>
+            <TableHead>Trimestral</TableHead>
+            <TableHead>Semestral</TableHead>
+            <TableHead>Anual</TableHead>
             <TableHead>Módulos</TableHead>
             <TableHead>Status</TableHead>
             <TableHead className="text-right">Ações</TableHead>
@@ -34,7 +37,7 @@ export function PlansList({ plans, onEdit, onDelete, isDeleting }: PlansListProp
         <TableBody>
           {plans.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={5} className="text-center py-10 text-muted-foreground italic">
+              <TableCell colSpan={8} className="text-center py-10 text-muted-foreground italic">
                 Nenhum plano cadastrado.
               </TableCell>
             </TableRow>
@@ -47,11 +50,29 @@ export function PlansList({ plans, onEdit, onDelete, isDeleting }: PlansListProp
                     <div className="text-xs text-muted-foreground">{plan.description}</div>
                   )}
                 </TableCell>
-                <TableCell>
+                <TableCell className="font-medium text-primary">
                   {new Intl.NumberFormat('pt-BR', {
                     style: 'currency',
                     currency: 'BRL',
                   }).format(plan.price)}
+                </TableCell>
+                <TableCell>
+                  {new Intl.NumberFormat('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL',
+                  }).format(plan.price_quarterly || 0)}
+                </TableCell>
+                <TableCell>
+                  {new Intl.NumberFormat('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL',
+                  }).format(plan.price_semiannual || 0)}
+                </TableCell>
+                <TableCell>
+                  {new Intl.NumberFormat('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL',
+                  }).format(plan.price_annual || 0)}
                 </TableCell>
                 <TableCell>
                   <Badge variant="secondary" className="gap-1">
