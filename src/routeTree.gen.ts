@@ -13,6 +13,8 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedTelefoniaRouteImport } from './routes/_authenticated/telefonia'
+import { Route as AuthenticatedQueuesRouteImport } from './routes/_authenticated/queues'
+import { Route as AuthenticatedProvidersRouteImport } from './routes/_authenticated/providers'
 import { Route as AuthenticatedPlansRouteImport } from './routes/_authenticated/plans'
 import { Route as AuthenticatedLegalCasesRouteImport } from './routes/_authenticated/legal-cases'
 import { Route as AuthenticatedEquipeRouteImport } from './routes/_authenticated/equipe'
@@ -52,6 +54,16 @@ const IndexRoute = IndexRouteImport.update({
 const AuthenticatedTelefoniaRoute = AuthenticatedTelefoniaRouteImport.update({
   id: '/telefonia',
   path: '/telefonia',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedQueuesRoute = AuthenticatedQueuesRouteImport.update({
+  id: '/queues',
+  path: '/queues',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedProvidersRoute = AuthenticatedProvidersRouteImport.update({
+  id: '/providers',
+  path: '/providers',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedPlansRoute = AuthenticatedPlansRouteImport.update({
@@ -182,6 +194,8 @@ export interface FileRoutesByFullPath {
   '/equipe': typeof AuthenticatedEquipeRoute
   '/legal-cases': typeof AuthenticatedLegalCasesRoute
   '/plans': typeof AuthenticatedPlansRoute
+  '/providers': typeof AuthenticatedProvidersRoute
+  '/queues': typeof AuthenticatedQueuesRoute
   '/telefonia': typeof AuthenticatedTelefoniaRoute
   '/clients/new': typeof AuthenticatedClientsNewRoute
   '/clients/': typeof AuthenticatedClientsIndexRoute
@@ -208,6 +222,8 @@ export interface FileRoutesByTo {
   '/equipe': typeof AuthenticatedEquipeRoute
   '/legal-cases': typeof AuthenticatedLegalCasesRoute
   '/plans': typeof AuthenticatedPlansRoute
+  '/providers': typeof AuthenticatedProvidersRoute
+  '/queues': typeof AuthenticatedQueuesRoute
   '/telefonia': typeof AuthenticatedTelefoniaRoute
   '/clients/new': typeof AuthenticatedClientsNewRoute
   '/clients': typeof AuthenticatedClientsIndexRoute
@@ -236,6 +252,8 @@ export interface FileRoutesById {
   '/_authenticated/equipe': typeof AuthenticatedEquipeRoute
   '/_authenticated/legal-cases': typeof AuthenticatedLegalCasesRoute
   '/_authenticated/plans': typeof AuthenticatedPlansRoute
+  '/_authenticated/providers': typeof AuthenticatedProvidersRoute
+  '/_authenticated/queues': typeof AuthenticatedQueuesRoute
   '/_authenticated/telefonia': typeof AuthenticatedTelefoniaRoute
   '/_authenticated/clients/new': typeof AuthenticatedClientsNewRoute
   '/_authenticated/clients/': typeof AuthenticatedClientsIndexRoute
@@ -264,6 +282,8 @@ export interface FileRouteTypes {
     | '/equipe'
     | '/legal-cases'
     | '/plans'
+    | '/providers'
+    | '/queues'
     | '/telefonia'
     | '/clients/new'
     | '/clients/'
@@ -290,6 +310,8 @@ export interface FileRouteTypes {
     | '/equipe'
     | '/legal-cases'
     | '/plans'
+    | '/providers'
+    | '/queues'
     | '/telefonia'
     | '/clients/new'
     | '/clients'
@@ -317,6 +339,8 @@ export interface FileRouteTypes {
     | '/_authenticated/equipe'
     | '/_authenticated/legal-cases'
     | '/_authenticated/plans'
+    | '/_authenticated/providers'
+    | '/_authenticated/queues'
     | '/_authenticated/telefonia'
     | '/_authenticated/clients/new'
     | '/_authenticated/clients/'
@@ -368,6 +392,20 @@ declare module '@tanstack/react-router' {
       path: '/telefonia'
       fullPath: '/telefonia'
       preLoaderRoute: typeof AuthenticatedTelefoniaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/queues': {
+      id: '/_authenticated/queues'
+      path: '/queues'
+      fullPath: '/queues'
+      preLoaderRoute: typeof AuthenticatedQueuesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/providers': {
+      id: '/_authenticated/providers'
+      path: '/providers'
+      fullPath: '/providers'
+      preLoaderRoute: typeof AuthenticatedProvidersRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/plans': {
@@ -533,6 +571,8 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedEquipeRoute: typeof AuthenticatedEquipeRoute
   AuthenticatedLegalCasesRoute: typeof AuthenticatedLegalCasesRoute
   AuthenticatedPlansRoute: typeof AuthenticatedPlansRoute
+  AuthenticatedProvidersRoute: typeof AuthenticatedProvidersRoute
+  AuthenticatedQueuesRoute: typeof AuthenticatedQueuesRoute
   AuthenticatedTelefoniaRoute: typeof AuthenticatedTelefoniaRoute
   AuthenticatedClientsNewRoute: typeof AuthenticatedClientsNewRoute
   AuthenticatedClientsIndexRoute: typeof AuthenticatedClientsIndexRoute
@@ -553,6 +593,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedEquipeRoute: AuthenticatedEquipeRoute,
   AuthenticatedLegalCasesRoute: AuthenticatedLegalCasesRoute,
   AuthenticatedPlansRoute: AuthenticatedPlansRoute,
+  AuthenticatedProvidersRoute: AuthenticatedProvidersRoute,
+  AuthenticatedQueuesRoute: AuthenticatedQueuesRoute,
   AuthenticatedTelefoniaRoute: AuthenticatedTelefoniaRoute,
   AuthenticatedClientsNewRoute: AuthenticatedClientsNewRoute,
   AuthenticatedClientsIndexRoute: AuthenticatedClientsIndexRoute,
@@ -576,3 +618,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
