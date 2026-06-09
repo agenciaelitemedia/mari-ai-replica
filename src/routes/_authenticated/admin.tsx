@@ -16,13 +16,14 @@ import { useModulesAdmin, type ModuleFormData } from '@/hooks/useModulesAdmin';
 import { PlansList } from '@/components/admin/planos/PlansList';
 import { PlanDialog } from '@/components/admin/planos/PlanDialog';
 import { usePlansAdmin, type PlanFormData } from '@/hooks/usePlansAdmin';
+import { ClientsManagement } from '@/components/admin/clientes/ClientsManagement';
 
 export const Route = createFileRoute('/_authenticated/admin')({
   component: AdminPage,
 });
 
 function AdminPage() {
-  const [activeTab, setActiveTab] = useState<'permissions' | 'modules' | 'plans'>('permissions');
+  const [activeTab, setActiveTab] = useState<'permissions' | 'modules' | 'plans' | 'clients'>('permissions');
 
   return (
     <div className="p-6 md:p-12 space-y-10 max-w-7xl mx-auto animate-in fade-in duration-500">
@@ -36,7 +37,7 @@ function AdminPage() {
       </header>
 
       <Tabs value={activeTab} onValueChange={(v: any) => setActiveTab(v)} className="w-full">
-        <TabsList className="grid w-full max-w-xl grid-cols-3 bg-muted/50 p-1.5 h-14 rounded-2xl mb-8">
+        <TabsList className="grid w-full max-w-2xl grid-cols-4 bg-muted/50 p-1.5 h-14 rounded-2xl mb-8">
           <TabsTrigger value="permissions" className="flex items-center gap-2 rounded-xl data-[state=active]:shadow-md font-bold text-sm">
             <Shield className="h-4 w-4" />
             Permissões
@@ -48,6 +49,10 @@ function AdminPage() {
           <TabsTrigger value="plans" className="flex items-center gap-2 rounded-xl data-[state=active]:shadow-md font-bold text-sm">
             <Package className="h-4 w-4" />
             Planos
+          </TabsTrigger>
+          <TabsTrigger value="clients" className="flex items-center gap-2 rounded-xl data-[state=active]:shadow-md font-bold text-sm">
+            <User className="h-4 w-4" />
+            Clientes
           </TabsTrigger>
         </TabsList>
 
@@ -61,6 +66,10 @@ function AdminPage() {
 
         <TabsContent value="plans" className="mt-6 space-y-6">
           <PlansManagement />
+        </TabsContent>
+
+        <TabsContent value="clients" className="mt-6 space-y-6">
+          <ClientsManagement />
         </TabsContent>
       </Tabs>
     </div>
