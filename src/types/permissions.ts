@@ -1,11 +1,11 @@
-import { Database } from "@/integrations/supabase/types";
+import { Database } from "@/integrations/supabase/client";
 
-export type AppRole = 'superadmin' | 'admin' | 'colaborador' | 'user' | 'time' | 'advogado' | 'comercial';
+export type AppRole = Database['public']['Enums']['app_role'];
 
 export type ModuleCategory = 'principal' | 'crm' | 'agente' | 'sistema' | 'admin' | 'financeiro';
 
 export type Module = Database['public']['Tables']['modules']['Row'];
-export type ModuleCode = Module['code'];
+export type ModuleCode = string;
 
 export interface UserPermission {
   module_code: string;
@@ -43,3 +43,4 @@ export type PermissionMap = Map<string, UserPermission>;
 export function createPermissionMap(permissions: UserPermission[]): PermissionMap {
   return new Map(permissions.map(p => [p.module_code, p]));
 }
+

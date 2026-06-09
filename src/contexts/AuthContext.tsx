@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { User } from '@supabase/supabase-js';
-import type { AppRole, ModuleCode, UserPermission, UserWithPermissions } from '@/types/permissions';
+import type { UserPermission } from '@/types/permissions';
 import { useQuery } from '@tanstack/react-query';
 
 interface AuthContextType {
@@ -24,7 +24,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   const { data: permissions = [], refetch: refetchPermissions } = useQuery({
-    queryKey: ['user-permissions', user?.id],
+    queryKey: ['user-permissions', user?.id, profile?.use_custom_permissions],
     queryFn: async () => {
       if (!user) return [];
 
@@ -35,7 +35,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .eq('user_id', user.id);
       
       const userRoles = roles?.map(r => r.role) || [];
-      const isAdminRole = userRoles.includes('admin') || userRoles.includes('superadmin');
 
       // 2. Get custom permissions if enabled
       if (profile?.use_custom_permissions) {
@@ -49,11 +48,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             module_code: (p.modules as any).code,
             module_name: (p.modules as any).name,
             category: (p.modules as any).category,
-            can_view: p.can_view,
-            can_create: p.can_create,
-            can_edit: p.can_edit,
-            can_delete: p.can_delete,
-          }));
+            can_view: p.can_view || false,
+            can_create: p.can_create || false,
+            can_edit: p.can_edit || false,
+            can_delete: p.can_delete || false,
+          })) as UserPermission[];
         }
       }
 
@@ -81,10 +80,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 can_delete: p.can_delete || false,
               });
             } else {
-              existing.can_view = existing.can_view || p.can_view;
-              existing.can_create = existing.can_create || p.can_create;
-              existing.can_edit = existing.can_edit || p.can_edit;
-              existing.can_delete = existing.can_delete || p.can_delete;
+              existing.can_view = existing.can_view || p.can_view || false;
+              existing.can_create = existing.can_create || p.can_create || false;
+              existing.can_edit = existing.can_edit || p.can_edit || false;
+              existing.can_delete = existing.can_delete || p.can_delete || false;
             }
           });
           return Array.from(merged.values());
@@ -109,12 +108,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
-      setIsLoading(false);
+      if (!session) setIsLoading(false);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
-      setIsLoading(false);
+      if (!session) setIsLoading(false);
     });
 
     return () => subscription.unsubscribe();
@@ -122,9 +121,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (user) {
-      refreshProfile();
+      refreshProfile().then(() => setIsLoading(false));
     } else {
       setProfile(null);
+      setIsLoading(false);
     }
   }, [user, refreshProfile]);
 
@@ -142,10 +142,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!perm) return false;
     
     switch (action) {
-      case 'view': return perm.can_view;
-      case 'create': return perm.can_create;
-      case 'edit': return perm.can_edit;
-      case 'delete': return perm.can_delete;
+      case 'view': return !!perm.can_view;
+      case 'create': return !!perm.can_create;
+      case 'edit': return !!perm.can_edit;
+      case 'delete': return !!perm.can_delete;
       default: return false;
     }
   }, [permissions, isSuperAdmin]);
