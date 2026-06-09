@@ -154,10 +154,9 @@ export const Route = createFileRoute('/api/public/webhooks/uazapi')({
             } as any)
 
             if (!fromMe) {
-              await supabaseAdmin.rpc('noop' as any).catch(() => null) // placeholder
               await supabaseAdmin
                 .from('chat_contacts')
-                .update({ unread_count: (1 as any) })
+                .update({ unread_count: 1 as any })
                 .eq('id', contactId)
             }
           }
