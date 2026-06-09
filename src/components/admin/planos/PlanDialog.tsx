@@ -172,6 +172,21 @@ export function PlanDialog({ open, onClose, plan, onSave, isLoading }: PlanDialo
     }
   };
 
+  const toggleAllInCategory = (categoryMods: Module[]) => {
+    const current = form.getValues('module_ids') || [];
+    const categoryIds = categoryMods.map(m => m.id);
+    const allSelected = categoryIds.every(id => current.includes(id));
+    
+    if (allSelected) {
+      // Deselect all in this category
+      form.setValue('module_ids', current.filter(id => !categoryIds.includes(id)), { shouldValidate: true });
+    } else {
+      // Select all in this category (without duplicates)
+      const newIds = [...new Set([...current, ...categoryIds])];
+      form.setValue('module_ids', newIds, { shouldValidate: true });
+    }
+  };
+
   const groupedModules = modules.reduce((acc, mod) => {
     const cat = mod.category || 'Outros';
     if (!acc[cat]) acc[cat] = [];
@@ -451,55 +466,73 @@ export function PlanDialog({ open, onClose, plan, onSave, isLoading }: PlanDialo
                       </div>
                     ) : (
                       <div className="space-y-10">
-                        {Object.entries(groupedModules).map(([category, mods]) => (
-                          <div key={category} className="space-y-4">
-                            <h4 className="text-xs font-black text-primary/70 uppercase tracking-[0.3em] pl-2">{category}</h4>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              {mods.map((mod) => {
-                                const isSelected = form.watch('module_ids').includes(mod.id);
-                                return (
-                                  <div
-                                    key={mod.id}
-                                    className={cn(
-                                      "flex items-center space-x-4 p-5 rounded-3xl border-2 transition-all duration-300 cursor-pointer group relative overflow-hidden",
-                                      isSelected
-                                        ? "bg-primary/10 border-primary shadow-xl shadow-primary/5"
-                                        : "bg-muted/5 border-border/30 hover:bg-muted/10 hover:border-border/60"
-                                    )}
-                                    onClick={() => toggleModule(mod.id)}
-                                  >
-                                    {isSelected && (
-                                      <div className="absolute top-0 right-0 p-1 bg-primary text-primary-foreground rounded-bl-xl">
-                                        <Check className="w-3 h-3 stroke-[4px]" />
-                                      </div>
-                                    )}
-                                    <div className={cn(
-                                      "w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-inner",
-                                      isSelected ? "bg-primary text-primary-foreground" : "bg-muted/20 text-muted-foreground group-hover:bg-muted/40"
-                                    )}>
-                                      <Puzzle className="w-6 h-6" />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                      <label className={cn(
-                                        "text-base font-black leading-tight cursor-pointer transition-colors block truncate",
-                                        isSelected ? "text-foreground" : "text-muted-foreground group-hover:text-foreground"
+                        {Object.entries(groupedModules).map(([category, mods]) => {
+                          const categoryIds = mods.map(m => m.id);
+                          const currentSelected = form.watch('module_ids') || [];
+                          const isCategoryAllSelected = categoryIds.every(id => currentSelected.includes(id));
+                          
+                          return (
+                            <div key={category} className="space-y-4">
+                              <div className="flex items-center justify-between px-2">
+                                <h4 className="text-xs font-black text-primary/70 uppercase tracking-[0.3em]">{category}</h4>
+                                <Button 
+                                  type="button" 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  onClick={() => toggleAllInCategory(mods)}
+                                  className="h-7 px-3 text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary/10"
+                                >
+                                  {isCategoryAllSelected ? 'Desmarcar Todos' : 'Selecionar Todos'}
+                                </Button>
+                              </div>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {mods.map((mod) => {
+                                  const isSelected = currentSelected.includes(mod.id);
+                                  return (
+                                    <div
+                                      key={mod.id}
+                                      className={cn(
+                                        "flex items-center space-x-4 p-5 rounded-3xl border-2 transition-all duration-300 cursor-pointer group relative overflow-hidden",
+                                        isSelected
+                                          ? "bg-primary/10 border-primary shadow-xl shadow-primary/5"
+                                          : "bg-muted/5 border-border/30 hover:bg-muted/10 hover:border-border/60"
+                                      )}
+                                      onClick={() => toggleModule(mod.id)}
+                                    >
+                                      {isSelected && (
+                                        <div className="absolute top-0 right-0 p-1 bg-primary text-primary-foreground rounded-bl-xl animate-in zoom-in duration-300">
+                                          <Check className="w-3 h-3 stroke-[4px]" />
+                                        </div>
+                                      )}
+                                      <div className={cn(
+                                        "w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-inner",
+                                        isSelected ? "bg-primary text-primary-foreground" : "bg-muted/20 text-muted-foreground group-hover:bg-muted/40"
                                       )}>
-                                        {mod.name}
-                                      </label>
-                                      <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1 opacity-60">
-                                        CODE: {mod.code}
-                                      </p>
+                                        <Puzzle className="w-6 h-6" />
+                                      </div>
+                                      <div className="flex-1 min-w-0">
+                                        <label className={cn(
+                                          "text-base font-black leading-tight cursor-pointer transition-colors block truncate",
+                                          isSelected ? "text-foreground" : "text-muted-foreground group-hover:text-foreground"
+                                        )}>
+                                          {mod.name}
+                                        </label>
+                                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1 opacity-60">
+                                          CODE: {mod.code}
+                                        </p>
+                                      </div>
+                                      <Checkbox
+                                        checked={isSelected}
+                                        onCheckedChange={() => toggleModule(mod.id)}
+                                        className="h-6 w-6 rounded-lg data-[state=checked]:bg-primary border-2 border-border/40 transition-transform active:scale-90"
+                                      />
                                     </div>
-                                    <Checkbox
-                                      checked={isSelected}
-                                      className="h-6 w-6 rounded-lg data-[state=checked]:bg-primary border-2 border-border/40"
-                                    />
-                                  </div>
-                                );
-                              })}
+                                  );
+                                })}
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     )}
                   </div>
