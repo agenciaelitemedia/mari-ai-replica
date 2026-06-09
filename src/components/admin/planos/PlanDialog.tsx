@@ -578,8 +578,9 @@ export function PlanDialog({ open, onClose, plan, onSave, isLoading }: PlanDialo
                   </Button>
                 ) : (
                   <Button 
-                    type="submit" 
+                    type="button" 
                     disabled={isLoading} 
+                    onClick={form.handleSubmit(handleSubmit)}
                     className="rounded-2xl font-black uppercase tracking-widest text-xs h-12 px-10 bg-linear-to-r from-primary to-primary/80 shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
                   >
                     {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4 stroke-[3px]" />}
