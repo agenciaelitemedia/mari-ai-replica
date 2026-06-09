@@ -48,6 +48,9 @@ export function PlanDialog({ open, onClose, plan, onSave, isLoading }: PlanDialo
       price_annual: 0,
       is_active: true,
       module_ids: [],
+      settings: {
+        queues_count: 1,
+      },
     },
   });
 
@@ -76,6 +79,9 @@ export function PlanDialog({ open, onClose, plan, onSave, isLoading }: PlanDialo
         price_annual: Number(plan.price_annual || 0),
         is_active: plan.is_active,
         module_ids: plan.module_ids || [],
+        settings: {
+          queues_count: (plan.settings as any)?.queues_count || 1,
+        },
       });
     } else {
       form.reset({
@@ -87,6 +93,9 @@ export function PlanDialog({ open, onClose, plan, onSave, isLoading }: PlanDialo
         price_annual: 0,
         is_active: true,
         module_ids: [],
+        settings: {
+          queues_count: 1,
+        },
       });
     }
   }, [plan, form, open]);
@@ -265,11 +274,42 @@ export function PlanDialog({ open, onClose, plan, onSave, isLoading }: PlanDialo
 
                 <div className="space-y-4">
                   <div className="flex items-center justify-between border-b border-border/10 pb-2">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70 text-primary">Configurações do Plano</h3>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-5 rounded-2xl border border-border/40 bg-muted/20">
+                    <FormField
+                      control={form.control}
+                      name="settings.queues_count"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70">Quantidade de Filas</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              min={1}
+                              {...field}
+                              onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
+                              className="h-12 rounded-xl bg-card border-border/50 focus:ring-primary/20"
+                            />
+                          </FormControl>
+                          <FormDescription className="text-[10px] font-medium">Define quantas filas de atendimento este plano permite.</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between border-b border-border/10 pb-2">
                     <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70">Módulos Inclusos</h3>
                     <span className="text-[10px] font-bold px-2 py-1 bg-primary/10 text-primary rounded-full">
-                      {form.watch('module_ids').length} SELECIONADOS
+                      {form.watch('module_ids')?.length || 0} SELECIONADOS
                     </span>
                   </div>
+                  
+                  <ScrollArea className="h-[300px] w-full pr-4">
                   
                   {isLoadingModules ? (
                     <div className="flex justify-center p-8"><Loader2 className="animate-spin text-primary" /></div>
@@ -308,6 +348,7 @@ export function PlanDialog({ open, onClose, plan, onSave, isLoading }: PlanDialo
                       ))}
                     </div>
                   )}
+                  </ScrollArea>
                 </div>
               </div>
             </ScrollArea>
