@@ -974,7 +974,7 @@ export type Database = {
           access_token: string | null
           allowed_origins: string[] | null
           app_secret: string | null
-          client_id: string
+          client_id: string | null
           created_at: string
           evo_apikey: string | null
           evo_url: string | null
@@ -1006,7 +1006,7 @@ export type Database = {
           access_token?: string | null
           allowed_origins?: string[] | null
           app_secret?: string | null
-          client_id: string
+          client_id?: string | null
           created_at?: string
           evo_apikey?: string | null
           evo_url?: string | null
@@ -1038,7 +1038,7 @@ export type Database = {
           access_token?: string | null
           allowed_origins?: string[] | null
           app_secret?: string | null
-          client_id?: string
+          client_id?: string | null
           created_at?: string
           evo_apikey?: string | null
           evo_url?: string | null

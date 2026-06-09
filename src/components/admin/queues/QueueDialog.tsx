@@ -11,31 +11,25 @@ interface Props {
   onClose: () => void
   queue: any | null
   providers: any[]
-  clients: Array<{ id: string; name: string }>
-  isSuperAdmin: boolean
-  defaultClientId?: string | null
   onSave: (data: any) => void
   isSaving?: boolean
 }
 
-export function QueueDialog({ open, onClose, queue, providers, clients, isSuperAdmin, defaultClientId, onSave, isSaving }: Props) {
+export function QueueDialog({ open, onClose, queue, providers, onSave, isSaving }: Props) {
   const [form, setForm] = useState<any>({})
 
   useEffect(() => {
     if (open) {
       if (queue) setForm({ ...queue })
-      else setForm({ is_active: true, client_id: defaultClientId ?? '', settings: { welcome_message: '' } })
+      else setForm({ is_active: true, settings: { welcome_message: '' } })
     }
-  }, [open, queue, defaultClientId])
+  }, [open, queue])
 
   const set = (k: string, v: any) => setForm((p: any) => ({ ...p, [k]: v }))
   const setSetting = (k: string, v: any) => setForm((p: any) => ({ ...p, settings: { ...(p.settings ?? {}), [k]: v } }))
 
-  const availableProviders = providers.filter(
-    (p) => p.is_active && (!form.client_id || p.client_id === form.client_id),
-  )
-
-  const canSave = !!(form.name && form.client_id && form.provider_id)
+  const availableProviders = providers.filter((p) => p.is_active)
+  const canSave = !!(form.name && form.provider_id)
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
@@ -51,20 +45,10 @@ export function QueueDialog({ open, onClose, queue, providers, clients, isSuperA
             <Input value={form.name ?? ''} onChange={(e) => set('name', e.target.value)} placeholder="Atendimento Principal" />
           </div>
 
-          <div className={isSuperAdmin ? '' : 'hidden col-span-2'}>
-            <Label>Cliente</Label>
-            <Select value={form.client_id ?? ''} onValueChange={(v) => set('client_id', v)}>
-              <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-              <SelectContent>
-                {clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-
           <div className="col-span-2">
             <Label>Provedor</Label>
-            <Select value={form.provider_id ?? ''} onValueChange={(v) => set('provider_id', v)} disabled={!form.client_id}>
-              <SelectTrigger><SelectValue placeholder={form.client_id ? 'Selecione o provedor' : 'Selecione um cliente primeiro'} /></SelectTrigger>
+            <Select value={form.provider_id ?? ''} onValueChange={(v) => set('provider_id', v)}>
+              <SelectTrigger><SelectValue placeholder="Selecione o provedor" /></SelectTrigger>
               <SelectContent>
                 {availableProviders.map((p) => (
                   <SelectItem key={p.id} value={p.id}>{p.name} — {p.provider_type}</SelectItem>
@@ -95,7 +79,14 @@ export function QueueDialog({ open, onClose, queue, providers, clients, isSuperA
 
         <DialogFooter className="gap-2">
           <Button variant="outline" onClick={onClose}>Cancelar</Button>
-          <Button onClick={() => onSave(form)} disabled={!canSave || isSaving}>
+          <Button onClick={() => onSave({
+            id: form.id,
+            name: form.name,
+            provider_id: form.provider_id,
+            phone_number: form.phone_number || undefined,
+            settings: form.settings ?? {},
+            is_active: !!form.is_active,
+          })} disabled={!canSave || isSaving}>
             {isSaving ? 'Salvando…' : 'Salvar fila'}
           </Button>
         </DialogFooter>

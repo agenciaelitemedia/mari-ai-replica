@@ -3,7 +3,6 @@ import { useState, useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Plus, Loader2 } from 'lucide-react'
-import { useAuth } from '@/contexts/AuthContext'
 import { useProvidersAdmin } from '@/hooks/useProvidersAdmin'
 import { useQueuesAdmin } from '@/hooks/useQueuesAdmin'
 import { QueuesList } from '@/components/admin/queues/QueuesList'
@@ -16,8 +15,6 @@ export const Route = createFileRoute('/_authenticated/queues')({
 })
 
 function QueuesPage() {
-  const { isSuperAdmin, profile } = useAuth()
-  const defaultClientId = profile?.client_id ?? null
   const { providers } = useProvidersAdmin()
   const { queues, isLoading, clients, save, isSaving, remove } = useQueuesAdmin()
   const clientsById = useMemo(() => Object.fromEntries(clients.map((c) => [c.id, c.name])), [clients])
@@ -41,7 +38,7 @@ function QueuesPage() {
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle>Filas de atendimento</CardTitle>
-            <CardDescription>Liberadas por cliente conforme limites do plano</CardDescription>
+            <CardDescription>Criadas para o seu cliente conforme limites do plano</CardDescription>
           </div>
           <Button onClick={() => { setEditing(null); setOpen(true) }}>
             <Plus className="h-4 w-4 mr-1" /> Nova fila
@@ -61,9 +58,6 @@ function QueuesPage() {
         onClose={() => setOpen(false)}
         queue={editing}
         providers={providers}
-        clients={clients}
-        isSuperAdmin={isSuperAdmin}
-        defaultClientId={defaultClientId}
         onSave={(data) => save(data, { onSuccess: () => setOpen(false) } as any)}
         isSaving={isSaving}
       />

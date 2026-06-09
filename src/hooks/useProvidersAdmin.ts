@@ -8,7 +8,7 @@ import {
   testProvider,
 } from '@/lib/providers.functions'
 
-export function useProvidersAdmin(clientId?: string) {
+export function useProvidersAdmin() {
   const qc = useQueryClient()
   const list = useServerFn(listProviders)
   const upsert = useServerFn(upsertProvider)
@@ -16,8 +16,8 @@ export function useProvidersAdmin(clientId?: string) {
   const test = useServerFn(testProvider)
 
   const providersQ = useQuery({
-    queryKey: ['providers', clientId ?? 'mine'],
-    queryFn: () => list({ data: { clientId } }),
+    queryKey: ['providers'],
+    queryFn: () => list({ data: {} }),
   })
 
   const save = useMutation({

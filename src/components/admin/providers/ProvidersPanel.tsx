@@ -1,20 +1,16 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Plus, Loader2 } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useProvidersAdmin } from '@/hooks/useProvidersAdmin'
-import { useQueuesAdmin } from '@/hooks/useQueuesAdmin'
 import { ProvidersList } from './ProvidersList'
 import { ProviderDialog } from './ProviderDialog'
 import { confirmDelete } from '@/lib/swal'
 
 export function ProvidersPanel() {
-  const { isSuperAdmin, profile } = useAuth()
-  const defaultClientId = profile?.client_id ?? null
+  const { isSuperAdmin } = useAuth()
   const { providers, isLoading, save, isSaving, remove, test, isTesting } = useProvidersAdmin()
-  const { clients } = useQueuesAdmin()
-  const clientsById = useMemo(() => Object.fromEntries(clients.map((c) => [c.id, c.name])), [clients])
 
   const [open, setOpen] = useState(false)
   const [editing, setEditing] = useState<any | null>(null)
@@ -29,11 +25,15 @@ export function ProvidersPanel() {
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
           <CardTitle>Provedores de canais</CardTitle>
-          <CardDescription>UaZapi, WABA Oficial, Instagram e WebChat</CardDescription>
+          <CardDescription>
+            Configuração global compartilhada entre todos os clientes (apenas superadmin)
+          </CardDescription>
         </div>
-        <Button onClick={() => { setEditing(null); setOpen(true) }}>
-          <Plus className="h-4 w-4 mr-1" /> Novo provedor
-        </Button>
+        {isSuperAdmin && (
+          <Button onClick={() => { setEditing(null); setOpen(true) }}>
+            <Plus className="h-4 w-4 mr-1" /> Novo provedor
+          </Button>
+        )}
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -41,8 +41,6 @@ export function ProvidersPanel() {
         ) : (
           <ProvidersList
             providers={providers}
-            clientsById={clientsById}
-            showClient={isSuperAdmin}
             onEdit={(p) => { setEditing(p); setOpen(true) }}
             onDelete={handleDelete}
             onTest={test}
@@ -55,9 +53,6 @@ export function ProvidersPanel() {
         open={open}
         onClose={() => setOpen(false)}
         provider={editing}
-        clients={clients}
-        isSuperAdmin={isSuperAdmin}
-        defaultClientId={defaultClientId}
         onSave={(data) => save(data, { onSuccess: () => setOpen(false) } as any)}
         isSaving={isSaving}
       />
