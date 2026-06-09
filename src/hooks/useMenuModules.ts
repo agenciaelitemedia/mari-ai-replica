@@ -28,6 +28,7 @@ export function useMenuModules() {
         .eq('is_active', true)
         .order('display_order', { ascending: true });
       
+      console.log('Modules fetched:', data?.length);
       if (error) throw error;
       return data as MenuModule[];
     },
