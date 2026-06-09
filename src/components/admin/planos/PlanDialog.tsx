@@ -134,8 +134,8 @@ export function PlanDialog({ open, onClose, plan, onSave, isLoading }: PlanDialo
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-col flex-1 overflow-hidden">
-            <ScrollArea className="flex-1 p-8">
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="flex min-h-0 flex-col flex-1 overflow-hidden">
+            <ScrollArea className="min-h-0 flex-1 p-8">
               <div className="space-y-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormField
@@ -309,7 +309,7 @@ export function PlanDialog({ open, onClose, plan, onSave, isLoading }: PlanDialo
                     </span>
                   </div>
                   
-                  <ScrollArea className="h-[560px] w-full pr-4">
+                  <ScrollArea className="h-[420px] max-h-[50vh] w-full pr-4">
                   
                   {isLoadingModules ? (
                     <div className="flex justify-center p-8"><Loader2 className="animate-spin text-primary" /></div>
