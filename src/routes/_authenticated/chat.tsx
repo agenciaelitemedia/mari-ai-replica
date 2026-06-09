@@ -4,12 +4,30 @@ import { useServerFn } from '@tanstack/react-start'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
 import { listConversations, listMessages, sendMessage } from '@/lib/chat.functions'
+import { listBoards, getBoardData, linkConversationToDeal } from '@/lib/crm.functions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
-import { Send, MessageSquare } from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Send, MessageSquare, Briefcase } from 'lucide-react'
+import { toast } from 'sonner'
 
 export const Route = createFileRoute('/_authenticated/chat')({
   component: ChatPage,
