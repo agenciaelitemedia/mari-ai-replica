@@ -50,7 +50,7 @@ function AuthenticatedLayout() {
         <div className="h-20 flex items-center px-8 border-b border-border/50">
           <Link to="/dashboard" className="flex items-center gap-2 group transition-all duration-300">
             <div className="h-10 w-10 bg-linear-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform">
-              <LucideIcons.Sparkles className="h-6 w-6 text-primary-foreground" />
+              <Sparkles className="h-6 w-6 text-primary-foreground" />
             </div>
             <span className="text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-linear-to-r from-foreground to-foreground/70">
               Mar<span className="text-primary">I.A</span>
@@ -67,7 +67,7 @@ function AuthenticatedLayout() {
               <div className="space-y-1">
                 {groupModules.map((item) => {
                   const active = pathname === item.route || (item.route && item.route !== '/' && pathname.startsWith(item.route));
-                  const IconComponent = (LucideIcons as any)[item.icon || 'Circle'];
+                  const IconComponent = getIcon(item.icon);
                   
                   return (
                     <Link
@@ -128,7 +128,7 @@ function AuthenticatedLayout() {
         <header className="md:hidden h-16 flex items-center justify-between px-6 border-b bg-card/80 backdrop-blur-xl sticky top-0 z-50">
           <Link to="/dashboard" className="flex items-center gap-2">
             <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
-              <LucideIcons.Sparkles className="h-5 w-5 text-primary-foreground" />
+              <Sparkles className="h-5 w-5 text-primary-foreground" />
             </div>
             <span className="text-xl font-bold">
               Mar<span className="text-primary">I.A</span>
