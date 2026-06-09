@@ -28,15 +28,16 @@ import type { ModuleFormData } from '@/hooks/useModulesAdmin';
 const moduleSchema = z.object({
   code: z.string().min(2, 'Código deve ter pelo menos 2 caracteres'),
   name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
-  description: z.string().optional().nullable(),
+  description: z.string().optional(),
   category: z.string().min(1, 'Categoria é obrigatória'),
-  icon: z.string().optional().nullable(),
-  route: z.string().optional().nullable(),
-  menu_group: z.string().optional().nullable(),
+  icon: z.string().optional(),
+  route: z.string().optional(),
+  menu_group: z.string().optional(),
   is_menu_visible: z.boolean(),
   display_order: z.number().min(0),
   is_active: z.boolean(),
 });
+
 
 interface ModuleDialogProps {
   open: boolean;
@@ -73,7 +74,8 @@ export function ModuleDialog({ open, onClose, module, onSave, isLoading }: Modul
     watch,
     formState: { errors },
   } = useForm<ModuleFormData>({
-    resolver: zodResolver(moduleSchema),
+    resolver: zodResolver(moduleSchema) as any,
+
     defaultValues: {
       code: '',
       name: '',
