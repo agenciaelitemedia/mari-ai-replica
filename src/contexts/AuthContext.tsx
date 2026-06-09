@@ -21,6 +21,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<any>(null);
+  const [userRoles, setUserRoles] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const { data: permissions = [], refetch: refetchPermissions } = useQuery({
@@ -99,12 +100,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const refreshProfile = useCallback(async () => {
     if (!user) return;
-    const { data } = await supabase
-      .from('profiles')
-      .select('*, user_roles(role)')
-      .eq('id', user.id)
-      .maybeSingle();
-    setProfile(data);
+    
+    // Fetch profile and roles in parallel
+    const [profileRes, rolesRes] = await Promise.all([
+      supabase.from('profiles').select('*').eq('id', user.id).maybeSingle(),
+      supabase.from('user_roles').select('role').eq('user_id', user.id)
+    ]);
+
+    if (profileRes.data) setProfile(profileRes.data);
+    if (rolesRes.data) setUserRoles(rolesRes.data.map(r => r.role));
   }, [user]);
 
   useEffect(() => {
@@ -134,7 +138,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await supabase.auth.signOut();
   };
 
-  const userRoles = profile?.user_roles?.map((r: any) => r.role) || [];
   const isAdmin = userRoles.includes('admin') || userRoles.includes('superadmin');
   const isSuperAdmin = userRoles.includes('superadmin');
 
