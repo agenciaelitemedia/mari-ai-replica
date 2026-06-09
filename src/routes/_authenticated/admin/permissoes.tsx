@@ -5,14 +5,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
-import type { AppRole, UserPermission } from '@/types/permissions';
+import type { AppRole } from '@/types/permissions';
 
 export const Route = createFileRoute('/_authenticated/admin/permissoes' as any)({
   component: PermissionsPage,
 });
+
+type PermissionField = 'can_view' | 'can_create' | 'can_edit' | 'can_delete';
 
 function PermissionsPage() {
   const queryClient = useQueryClient();
@@ -37,23 +38,26 @@ function PermissionsPage() {
   });
 
   const updatePermissionMutation = useMutation({
-    mutationFn: async ({ role, moduleId, field, value }: { role: AppRole; moduleId: string; field: string; value: boolean }) => {
+    mutationFn: async ({ role, moduleId, field, value }: { role: AppRole; moduleId: string; field: PermissionField; value: boolean }) => {
       const existing = rolePermissions.find(p => p.role === role && p.module_id === moduleId);
       
       if (existing) {
+        const updateData: any = {};
+        updateData[field] = value;
         const { error } = await supabase
           .from('role_default_permissions')
-          .update({ [field]: value })
+          .update(updateData)
           .eq('id', existing.id);
         if (error) throw error;
       } else {
+        const insertData: any = {
+          role,
+          module_id: moduleId,
+        };
+        insertData[field] = value;
         const { error } = await supabase
           .from('role_default_permissions')
-          .insert({
-            role,
-            module_id: moduleId,
-            [field]: value
-          });
+          .insert(insertData);
         if (error) throw error;
       }
     },
@@ -66,7 +70,7 @@ function PermissionsPage() {
     },
   });
 
-  const togglePermission = (role: AppRole, moduleId: string, field: string, currentValue: boolean) => {
+  const togglePermission = (role: AppRole, moduleId: string, field: PermissionField, currentValue: boolean) => {
     updatePermissionMutation.mutate({ role, moduleId, field, value: !currentValue });
   };
 
