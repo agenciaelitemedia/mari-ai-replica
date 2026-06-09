@@ -6,10 +6,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Pencil, User, Building2, CreditCard, Copy, Check, Loader2, X } from 'lucide-react';
+import { ArrowLeft, Pencil, User, Building2, CreditCard, Copy, Check, Loader2, X, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { maskCpfCnpj, maskPhone, maskCep } from '@/lib/br-utils';
+import { DeleteClientDialog } from '@/components/admin/clientes/DeleteClientDialog';
 
 export const Route = createFileRoute('/_authenticated/clients/$id')({
   component: ClientDetailPage,
@@ -85,13 +86,16 @@ function ClientDetailPage() {
 
   return (
     <div className="min-h-screen p-6 md:p-10 max-w-6xl mx-auto space-y-6 animate-in fade-in duration-300">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
         <Button variant="outline" asChild className="rounded-xl">
           <Link to="/clients"><ArrowLeft className="h-4 w-4 mr-2" /> Voltar à listagem</Link>
         </Button>
-        <Button onClick={() => navigate({ to: '/clients/$id/edit', params: { id } })} className="rounded-xl">
-          <Pencil className="h-4 w-4 mr-2" /> Editar
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => navigate({ to: '/clients/$id/edit', params: { id } })} className="rounded-xl">
+            <Pencil className="h-4 w-4 mr-2" /> Editar
+          </Button>
+          <DeleteClientDialog clientId={client.id} clientName={client.name} />
+        </div>
       </div>
 
       <Card className="p-6 rounded-2xl border-border/40 bg-card/60 backdrop-blur-xl">
