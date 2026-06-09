@@ -116,7 +116,6 @@ export const testProvider = createServerFn({ method: 'POST' })
 
 const queueSchema = z.object({
   id: z.string().uuid().optional(),
-  client_id: z.string().min(1),
   provider_id: z.string().uuid(),
   name: z.string().min(1).max(120),
   phone_number: z.string().optional(),
@@ -126,10 +125,7 @@ const queueSchema = z.object({
 
 export const listQueuesFull = createServerFn({ method: 'GET' })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { clientId?: string } | undefined) =>
-    z.object({ clientId: z.string().optional() }).parse(input ?? {}),
-  )
-  .handler(async ({ data, context }) => {
+  .handler(async ({ context }) => {
     const { supabase, userId } = context
     const superadmin = await isSuperAdmin(supabase, userId)
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
@@ -144,8 +140,6 @@ export const listQueuesFull = createServerFn({ method: 'GET' })
       const cid = await getUserClientId(supabase, userId)
       if (!cid) return { queues: [] }
       q = q.eq('client_id', cid)
-    } else if (data.clientId) {
-      q = q.eq('client_id', data.clientId)
     }
     const { data: rows, error } = await q
     if (error) throw new Error(error.message)
@@ -157,11 +151,8 @@ export const upsertQueueFull = createServerFn({ method: 'POST' })
   .inputValidator((input: unknown) => queueSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context
-    const superadmin = await isSuperAdmin(supabase, userId)
-    if (!superadmin) {
-      const cid = await getUserClientId(supabase, userId)
-      if (cid !== data.client_id) throw new Error('Sem permissão')
-    }
+    const clientId = await getUserClientId(supabase, userId)
+    if (!clientId) throw new Error('Usuário sem cliente associado')
 
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
 
@@ -173,14 +164,13 @@ export const upsertQueueFull = createServerFn({ method: 'POST' })
       .maybeSingle()
     if (!prov) throw new Error('Provedor não encontrado')
     if (!prov.is_active) throw new Error('Provedor está inativo')
-    if (prov.client_id !== data.client_id) throw new Error('Provedor pertence a outro cliente')
 
     // Plan limit check on create
     if (!data.id) {
       const { data: client } = await supabaseAdmin
         .from('clients')
         .select('plan_id')
-        .eq('id', data.client_id)
+        .eq('id', clientId)
         .maybeSingle()
       if (client?.plan_id) {
         const { data: plan } = await supabaseAdmin
@@ -193,7 +183,7 @@ export const upsertQueueFull = createServerFn({ method: 'POST' })
           const { count } = await supabaseAdmin
             .from('queues')
             .select('id', { count: 'exact', head: true })
-            .eq('client_id', data.client_id)
+            .eq('client_id', clientId)
             .eq('is_deleted', false)
           if ((count ?? 0) >= limit) {
             throw new Error(`Limite do plano atingido (${limit} fila(s))`)
@@ -203,7 +193,7 @@ export const upsertQueueFull = createServerFn({ method: 'POST' })
     }
 
     const payload: any = {
-      client_id: data.client_id,
+      client_id: clientId,
       provider_id: data.provider_id,
       name: data.name,
       phone_number: data.phone_number ?? null,
@@ -223,6 +213,7 @@ export const upsertQueueFull = createServerFn({ method: 'POST' })
     if (error) throw new Error(error.message)
     return { queue: row }
   })
+
 
 export const deleteQueueFull = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
