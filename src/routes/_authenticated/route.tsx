@@ -75,7 +75,7 @@ function AuthenticatedLayout() {
 
   const initials = (profile?.full_name || user.email || "?")
     .split(" ")
-    .map((p) => p[0])
+    .map((p: string) => p[0])
     .slice(0, 2)
     .join("")
     .toUpperCase();
