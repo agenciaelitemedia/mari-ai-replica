@@ -39,6 +39,7 @@ export function useMenuModules() {
     if (mod.is_menu_visible === false) return false;
     
     // Check if user has view permission for this module
+    // If it's superadmin, hasPermission will return true
     return hasPermission(mod.code, 'view');
   });
 
