@@ -24,6 +24,7 @@ import { Route as AuthenticatedComercialRouteImport } from './routes/_authentica
 import { Route as AuthenticatedChatRouteImport } from './routes/_authenticated/chat'
 import { Route as AuthenticatedAgentesRouteImport } from './routes/_authenticated/agentes'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as ApiPublicWebhooksUazapiRouteImport } from './routes/api/public/webhooks/uazapi'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -100,6 +101,11 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiPublicWebhooksUazapiRoute = ApiPublicWebhooksUazapiRouteImport.update({
+  id: '/api/public/webhooks/uazapi',
+  path: '/api/public/webhooks/uazapi',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -116,6 +122,7 @@ export interface FileRoutesByFullPath {
   '/equipe': typeof AuthenticatedEquipeRoute
   '/legal-cases': typeof AuthenticatedLegalCasesRoute
   '/telefonia': typeof AuthenticatedTelefoniaRoute
+  '/api/public/webhooks/uazapi': typeof ApiPublicWebhooksUazapiRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -132,6 +139,7 @@ export interface FileRoutesByTo {
   '/equipe': typeof AuthenticatedEquipeRoute
   '/legal-cases': typeof AuthenticatedLegalCasesRoute
   '/telefonia': typeof AuthenticatedTelefoniaRoute
+  '/api/public/webhooks/uazapi': typeof ApiPublicWebhooksUazapiRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -150,6 +158,7 @@ export interface FileRoutesById {
   '/_authenticated/equipe': typeof AuthenticatedEquipeRoute
   '/_authenticated/legal-cases': typeof AuthenticatedLegalCasesRoute
   '/_authenticated/telefonia': typeof AuthenticatedTelefoniaRoute
+  '/api/public/webhooks/uazapi': typeof ApiPublicWebhooksUazapiRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -168,6 +177,7 @@ export interface FileRouteTypes {
     | '/equipe'
     | '/legal-cases'
     | '/telefonia'
+    | '/api/public/webhooks/uazapi'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -184,6 +194,7 @@ export interface FileRouteTypes {
     | '/equipe'
     | '/legal-cases'
     | '/telefonia'
+    | '/api/public/webhooks/uazapi'
   id:
     | '__root__'
     | '/'
@@ -201,12 +212,14 @@ export interface FileRouteTypes {
     | '/_authenticated/equipe'
     | '/_authenticated/legal-cases'
     | '/_authenticated/telefonia'
+    | '/api/public/webhooks/uazapi'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiPublicWebhooksUazapiRoute: typeof ApiPublicWebhooksUazapiRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -316,6 +329,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/webhooks/uazapi': {
+      id: '/api/public/webhooks/uazapi'
+      path: '/api/public/webhooks/uazapi'
+      fullPath: '/api/public/webhooks/uazapi'
+      preLoaderRoute: typeof ApiPublicWebhooksUazapiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -356,7 +376,18 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiPublicWebhooksUazapiRoute: ApiPublicWebhooksUazapiRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
