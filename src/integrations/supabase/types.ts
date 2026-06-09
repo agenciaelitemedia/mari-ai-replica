@@ -971,40 +971,73 @@ export type Database = {
       }
       queue_providers: {
         Row: {
+          access_token: string | null
+          allowed_origins: string[] | null
+          app_secret: string | null
           client_id: string
           created_at: string
           evo_apikey: string | null
           evo_url: string | null
           id: string
+          ig_business_id: string | null
+          instance_name: string | null
           is_active: boolean
           metadata: Json | null
           name: string
+          page_id: string | null
+          phone_number: string | null
+          phone_number_id: string | null
           provider_type: string
           updated_at: string
+          verify_token: string | null
+          waba_id: string | null
+          widget_key: string | null
         }
         Insert: {
+          access_token?: string | null
+          allowed_origins?: string[] | null
+          app_secret?: string | null
           client_id: string
           created_at?: string
           evo_apikey?: string | null
           evo_url?: string | null
           id?: string
+          ig_business_id?: string | null
+          instance_name?: string | null
           is_active?: boolean
           metadata?: Json | null
           name: string
+          page_id?: string | null
+          phone_number?: string | null
+          phone_number_id?: string | null
           provider_type?: string
           updated_at?: string
+          verify_token?: string | null
+          waba_id?: string | null
+          widget_key?: string | null
         }
         Update: {
+          access_token?: string | null
+          allowed_origins?: string[] | null
+          app_secret?: string | null
           client_id?: string
           created_at?: string
           evo_apikey?: string | null
           evo_url?: string | null
           id?: string
+          ig_business_id?: string | null
+          instance_name?: string | null
           is_active?: boolean
           metadata?: Json | null
           name?: string
+          page_id?: string | null
+          phone_number?: string | null
+          phone_number_id?: string | null
           provider_type?: string
           updated_at?: string
+          verify_token?: string | null
+          waba_id?: string | null
+          widget_key?: string | null
         }
         Relationships: []
       }
@@ -1024,6 +1057,8 @@ export type Database = {
           metadata: Json | null
           name: string
           phone_number: string | null
+          provider_id: string | null
+          settings: Json | null
           updated_at: string
           waba_id: string | null
           waba_number_id: string | null
@@ -1044,6 +1079,8 @@ export type Database = {
           metadata?: Json | null
           name: string
           phone_number?: string | null
+          provider_id?: string | null
+          settings?: Json | null
           updated_at?: string
           waba_id?: string | null
           waba_number_id?: string | null
@@ -1064,12 +1101,22 @@ export type Database = {
           metadata?: Json | null
           name?: string
           phone_number?: string | null
+          provider_id?: string | null
+          settings?: Json | null
           updated_at?: string
           waba_id?: string | null
           waba_number_id?: string | null
           waba_token?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "queues_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "queue_providers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       role_default_permissions: {
         Row: {

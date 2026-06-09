@@ -1,125 +1,176 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
-import { useServerFn } from '@tanstack/react-start'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { listQueues, upsertQueue } from '@/lib/chat.functions'
+import { useMemo, useState } from 'react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Card } from '@/components/ui/card'
-import { Label } from '@/components/ui/label'
+import { Plus, Copy, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { useAuth } from '@/contexts/AuthContext'
+import { useProvidersAdmin } from '@/hooks/useProvidersAdmin'
+import { useQueuesAdmin } from '@/hooks/useQueuesAdmin'
+import { ProvidersList } from '@/components/admin/providers/ProvidersList'
+import { ProviderDialog } from '@/components/admin/providers/ProviderDialog'
+import { QueuesList } from '@/components/admin/queues/QueuesList'
+import { QueueDialog } from '@/components/admin/queues/QueueDialog'
+import { confirmDelete } from '@/lib/swal'
 
 export const Route = createFileRoute('/_authenticated/configuracoes')({
+  head: () => ({ meta: [{ title: 'Configurações — MarI.A.' }] }),
   component: SettingsPage,
 })
 
 function SettingsPage() {
-  const qc = useQueryClient()
-  const fetchQueues = useServerFn(listQueues)
-  const upsert = useServerFn(upsertQueue)
+  const { isSuperAdmin, profile } = useAuth()
+  const defaultClientId = profile?.client_id ?? null
 
-  const queuesQ = useQuery({
-    queryKey: ['queues'],
-    queryFn: () => fetchQueues(),
-  })
+  const { providers, isLoading: loadingProv, save: saveProv, isSaving: savingProv, remove: removeProv, test: testProv, isTesting } =
+    useProvidersAdmin()
+  const { queues, isLoading: loadingQ, clients, save: saveQ, isSaving: savingQ, remove: removeQ } = useQueuesAdmin()
 
-  const [form, setForm] = useState({
-    client_id: '',
-    name: '',
-    evo_url: '',
-    evo_apikey: '',
-    evo_instance: '',
-    phone_number: '',
-  })
+  const clientsById = useMemo(() => Object.fromEntries(clients.map((c) => [c.id, c.name])), [clients])
 
-  const create = useMutation({
-    mutationFn: () => upsert({ data: form }),
-    onSuccess: ({ queue }) => {
-      toast.success(`Instância "${queue.name}" salva`)
-      setForm({ client_id: '', name: '', evo_url: '', evo_apikey: '', evo_instance: '', phone_number: '' })
-      qc.invalidateQueries({ queryKey: ['queues'] })
-    },
-    onError: (e: any) => toast.error(e?.message ?? 'Erro ao salvar'),
-  })
+  const [provOpen, setProvOpen] = useState(false)
+  const [editingProv, setEditingProv] = useState<any | null>(null)
+  const [queueOpen, setQueueOpen] = useState(false)
+  const [editingQ, setEditingQ] = useState<any | null>(null)
+
+  const handleDeleteProv = async (id: string) => {
+    const ok = await confirmDelete({ title: 'Excluir provedor?', text: 'A exclusão será bloqueada se houver filas vinculadas.' })
+    if (ok) removeProv(id)
+  }
+  const handleDeleteQ = async (id: string) => {
+    const ok = await confirmDelete({ title: 'Excluir fila?', text: 'Esta ação não pode ser desfeita.' })
+    if (ok) removeQ(id)
+  }
 
   const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID
-  const webhookBase = `https://project--${projectId}.lovable.app/api/public/webhooks/uazapi`
+  const base = `https://project--${projectId}.lovable.app/api/public/webhooks`
+
+  const copy = (s: string) => {
+    navigator.clipboard.writeText(s)
+    toast.success('Copiado!')
+  }
 
   return (
-    <div className="p-6 space-y-6 max-w-4xl">
-      <div>
-        <h1 className="text-2xl font-bold">Configurações</h1>
-        <p className="text-muted-foreground">Instâncias de WhatsApp (UazAPI)</p>
-      </div>
+    <div className="p-6 md:p-10 max-w-6xl mx-auto space-y-6 animate-in fade-in duration-500">
+      <header>
+        <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">Configurações</h1>
+        <p className="text-muted-foreground mt-1">Provedores, filas de atendimento e webhooks</p>
+      </header>
 
-      <Card className="p-6">
-        <h2 className="font-semibold mb-4">Nova instância UazAPI</h2>
-        <form
-          className="grid grid-cols-2 gap-4"
-          onSubmit={(e) => {
-            e.preventDefault()
-            create.mutate()
-          }}
-        >
-          {(
-            [
-              ['client_id', 'Client ID', 'ex: cliente-001'],
-              ['name', 'Nome da fila', 'Atendimento Principal'],
-              ['evo_url', 'URL do servidor UazAPI', 'https://seu-servidor.uazapi.com'],
-              ['evo_apikey', 'Token (API key)', 'token gerado pela UazAPI'],
-              ['evo_instance', 'Instance ID', 'ex: minha-instancia'],
-              ['phone_number', 'Número (somente dígitos)', '5511999999999'],
-            ] as const
-          ).map(([k, label, ph]) => (
-            <div key={k} className={k === 'evo_url' || k === 'evo_apikey' ? 'col-span-2' : ''}>
-              <Label htmlFor={k}>{label}</Label>
-              <Input
-                id={k}
-                value={(form as any)[k]}
-                onChange={(e) => setForm({ ...form, [k]: e.target.value })}
-                placeholder={ph}
-              />
-            </div>
-          ))}
-          <div className="col-span-2 flex justify-end">
-            <Button type="submit" disabled={create.isPending || !form.name || !form.client_id}>
-              {create.isPending ? 'Salvando…' : 'Salvar instância'}
-            </Button>
-          </div>
-        </form>
-      </Card>
+      <Tabs defaultValue="providers" className="space-y-6">
+        <TabsList className="bg-muted/50 p-1 rounded-2xl">
+          <TabsTrigger value="providers" className="rounded-xl px-4">Provedores</TabsTrigger>
+          <TabsTrigger value="queues" className="rounded-xl px-4">Filas</TabsTrigger>
+          <TabsTrigger value="webhooks" className="rounded-xl px-4">Webhooks</TabsTrigger>
+        </TabsList>
 
-      <Card className="p-6">
-        <h2 className="font-semibold mb-2">Webhook UazAPI</h2>
-        <p className="text-sm text-muted-foreground mb-3">
-          Configure no painel da UazAPI o seguinte URL para receber mensagens. Inclua o <code>queue_id</code> e o
-          <code> token</code> (mesmo valor do campo "Token").
-        </p>
-        <pre className="bg-muted p-3 rounded text-xs overflow-x-auto">
-{`${webhookBase}?queue_id=<ID_DA_FILA>&token=<TOKEN>`}
-        </pre>
-      </Card>
-
-      <Card className="p-6">
-        <h2 className="font-semibold mb-4">Instâncias configuradas</h2>
-        {queuesQ.isLoading && <p className="text-sm text-muted-foreground">Carregando…</p>}
-        {queuesQ.data?.queues?.length === 0 && (
-          <p className="text-sm text-muted-foreground">Nenhuma instância ainda.</p>
-        )}
-        <div className="space-y-2">
-          {queuesQ.data?.queues?.map((q: any) => (
-            <div key={q.id} className="flex items-center justify-between border rounded p-3">
+        <TabsContent value="providers" className="space-y-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
               <div>
-                <p className="font-medium">{q.name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {q.evo_instance ?? '—'} • {q.phone_number ?? 'sem número'} • {q.is_active ? 'ativa' : 'inativa'}
-                </p>
+                <CardTitle>Provedores de canais</CardTitle>
+                <CardDescription>UazAPI, Evolution, WABA Oficial, Instagram e Webchat</CardDescription>
               </div>
-              <code className="text-[10px] text-muted-foreground">{q.id}</code>
-            </div>
-          ))}
-        </div>
-      </Card>
+              <Button onClick={() => { setEditingProv(null); setProvOpen(true) }}>
+                <Plus className="h-4 w-4 mr-1" /> Novo provedor
+              </Button>
+            </CardHeader>
+            <CardContent>
+              {loadingProv ? (
+                <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary h-8 w-8" /></div>
+              ) : (
+                <ProvidersList
+                  providers={providers}
+                  clientsById={clientsById}
+                  onEdit={(p) => { setEditingProv(p); setProvOpen(true) }}
+                  onDelete={handleDeleteProv}
+                  onTest={testProv}
+                  isTesting={isTesting}
+                />
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="queues" className="space-y-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Filas de atendimento</CardTitle>
+                <CardDescription>Vinculadas a um provedor e liberadas por cliente</CardDescription>
+              </div>
+              <Button onClick={() => { setEditingQ(null); setQueueOpen(true) }}>
+                <Plus className="h-4 w-4 mr-1" /> Nova fila
+              </Button>
+            </CardHeader>
+            <CardContent>
+              {loadingQ ? (
+                <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary h-8 w-8" /></div>
+              ) : (
+                <QueuesList queues={queues} clientsById={clientsById} onEdit={(q) => { setEditingQ(q); setQueueOpen(true) }} onDelete={handleDeleteQ} />
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="webhooks" className="space-y-4">
+          {providers.map((p) => {
+            const url =
+              p.provider_type === 'uazapi' ? `${base}/uazapi?queue_id=<ID_DA_FILA>&token=${p.evo_apikey ?? ''}` :
+              p.provider_type === 'evolution' ? `${base}/evolution?provider_id=${p.id}` :
+              p.provider_type === 'waba' ? `${base}/waba?provider_id=${p.id}` :
+              p.provider_type === 'instagram' ? `${base}/instagram?provider_id=${p.id}` :
+              `${base}/webchat?key=${p.widget_key ?? ''}`
+            return (
+              <Card key={p.id}>
+                <CardHeader>
+                  <CardTitle className="text-base">{p.name}</CardTitle>
+                  <CardDescription>{p.provider_type}</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <code className="flex-1 text-xs bg-muted rounded-lg p-2 break-all">{url}</code>
+                    <Button size="sm" variant="outline" onClick={() => copy(url)}><Copy className="h-4 w-4" /></Button>
+                  </div>
+                  {(p.provider_type === 'waba' || p.provider_type === 'instagram') && p.verify_token && (
+                    <p className="text-xs text-muted-foreground">Verify token: <code className="bg-muted px-1 rounded">{p.verify_token}</code></p>
+                  )}
+                  {p.provider_type === 'webchat' && p.widget_key && (
+                    <pre className="text-xs bg-muted rounded-lg p-2 overflow-x-auto">{`<script src="${base.replace('/webhooks','')}/widget.js?key=${p.widget_key}"></script>`}</pre>
+                  )}
+                </CardContent>
+              </Card>
+            )
+          })}
+          {providers.length === 0 && (
+            <p className="text-sm text-muted-foreground p-8 text-center">Cadastre um provedor para ver as URLs de webhook.</p>
+          )}
+        </TabsContent>
+      </Tabs>
+
+      <ProviderDialog
+        open={provOpen}
+        onClose={() => setProvOpen(false)}
+        provider={editingProv}
+        clients={clients}
+        isSuperAdmin={isSuperAdmin}
+        defaultClientId={defaultClientId}
+        onSave={(data) => saveProv(data, { onSuccess: () => setProvOpen(false) } as any)}
+        isSaving={savingProv}
+      />
+
+      <QueueDialog
+        open={queueOpen}
+        onClose={() => setQueueOpen(false)}
+        queue={editingQ}
+        providers={providers}
+        clients={clients}
+        isSuperAdmin={isSuperAdmin}
+        defaultClientId={defaultClientId}
+        onSave={(data) => saveQ(data, { onSuccess: () => setQueueOpen(false) } as any)}
+        isSaving={savingQ}
+      />
     </div>
   )
 }

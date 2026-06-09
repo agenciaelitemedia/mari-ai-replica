@@ -28,7 +28,11 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedClientsIndexRouteImport } from './routes/_authenticated/clients.index'
 import { Route as AuthenticatedClientsNewRouteImport } from './routes/_authenticated/clients.new'
 import { Route as AuthenticatedClientsIdIndexRouteImport } from './routes/_authenticated/clients.$id.index'
+import { Route as ApiPublicWebhooksWebchatRouteImport } from './routes/api/public/webhooks/webchat'
+import { Route as ApiPublicWebhooksWabaRouteImport } from './routes/api/public/webhooks/waba'
 import { Route as ApiPublicWebhooksUazapiRouteImport } from './routes/api/public/webhooks/uazapi'
+import { Route as ApiPublicWebhooksInstagramRouteImport } from './routes/api/public/webhooks/instagram'
+import { Route as ApiPublicWebhooksEvolutionRouteImport } from './routes/api/public/webhooks/evolution'
 import { Route as AuthenticatedClientsIdEditRouteImport } from './routes/_authenticated/clients.$id.edit'
 
 const AuthRoute = AuthRouteImport.update({
@@ -128,11 +132,34 @@ const AuthenticatedClientsIdIndexRoute =
     path: '/clients/$id/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicWebhooksWebchatRoute =
+  ApiPublicWebhooksWebchatRouteImport.update({
+    id: '/api/public/webhooks/webchat',
+    path: '/api/public/webhooks/webchat',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicWebhooksWabaRoute = ApiPublicWebhooksWabaRouteImport.update({
+  id: '/api/public/webhooks/waba',
+  path: '/api/public/webhooks/waba',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicWebhooksUazapiRoute = ApiPublicWebhooksUazapiRouteImport.update({
   id: '/api/public/webhooks/uazapi',
   path: '/api/public/webhooks/uazapi',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicWebhooksInstagramRoute =
+  ApiPublicWebhooksInstagramRouteImport.update({
+    id: '/api/public/webhooks/instagram',
+    path: '/api/public/webhooks/instagram',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicWebhooksEvolutionRoute =
+  ApiPublicWebhooksEvolutionRouteImport.update({
+    id: '/api/public/webhooks/evolution',
+    path: '/api/public/webhooks/evolution',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedClientsIdEditRoute =
   AuthenticatedClientsIdEditRouteImport.update({
     id: '/clients/$id/edit',
@@ -159,7 +186,11 @@ export interface FileRoutesByFullPath {
   '/clients/new': typeof AuthenticatedClientsNewRoute
   '/clients/': typeof AuthenticatedClientsIndexRoute
   '/clients/$id/edit': typeof AuthenticatedClientsIdEditRoute
+  '/api/public/webhooks/evolution': typeof ApiPublicWebhooksEvolutionRoute
+  '/api/public/webhooks/instagram': typeof ApiPublicWebhooksInstagramRoute
   '/api/public/webhooks/uazapi': typeof ApiPublicWebhooksUazapiRoute
+  '/api/public/webhooks/waba': typeof ApiPublicWebhooksWabaRoute
+  '/api/public/webhooks/webchat': typeof ApiPublicWebhooksWebchatRoute
   '/clients/$id/': typeof AuthenticatedClientsIdIndexRoute
 }
 export interface FileRoutesByTo {
@@ -181,7 +212,11 @@ export interface FileRoutesByTo {
   '/clients/new': typeof AuthenticatedClientsNewRoute
   '/clients': typeof AuthenticatedClientsIndexRoute
   '/clients/$id/edit': typeof AuthenticatedClientsIdEditRoute
+  '/api/public/webhooks/evolution': typeof ApiPublicWebhooksEvolutionRoute
+  '/api/public/webhooks/instagram': typeof ApiPublicWebhooksInstagramRoute
   '/api/public/webhooks/uazapi': typeof ApiPublicWebhooksUazapiRoute
+  '/api/public/webhooks/waba': typeof ApiPublicWebhooksWabaRoute
+  '/api/public/webhooks/webchat': typeof ApiPublicWebhooksWebchatRoute
   '/clients/$id': typeof AuthenticatedClientsIdIndexRoute
 }
 export interface FileRoutesById {
@@ -205,7 +240,11 @@ export interface FileRoutesById {
   '/_authenticated/clients/new': typeof AuthenticatedClientsNewRoute
   '/_authenticated/clients/': typeof AuthenticatedClientsIndexRoute
   '/_authenticated/clients/$id/edit': typeof AuthenticatedClientsIdEditRoute
+  '/api/public/webhooks/evolution': typeof ApiPublicWebhooksEvolutionRoute
+  '/api/public/webhooks/instagram': typeof ApiPublicWebhooksInstagramRoute
   '/api/public/webhooks/uazapi': typeof ApiPublicWebhooksUazapiRoute
+  '/api/public/webhooks/waba': typeof ApiPublicWebhooksWabaRoute
+  '/api/public/webhooks/webchat': typeof ApiPublicWebhooksWebchatRoute
   '/_authenticated/clients/$id/': typeof AuthenticatedClientsIdIndexRoute
 }
 export interface FileRouteTypes {
@@ -229,7 +268,11 @@ export interface FileRouteTypes {
     | '/clients/new'
     | '/clients/'
     | '/clients/$id/edit'
+    | '/api/public/webhooks/evolution'
+    | '/api/public/webhooks/instagram'
     | '/api/public/webhooks/uazapi'
+    | '/api/public/webhooks/waba'
+    | '/api/public/webhooks/webchat'
     | '/clients/$id/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -251,7 +294,11 @@ export interface FileRouteTypes {
     | '/clients/new'
     | '/clients'
     | '/clients/$id/edit'
+    | '/api/public/webhooks/evolution'
+    | '/api/public/webhooks/instagram'
     | '/api/public/webhooks/uazapi'
+    | '/api/public/webhooks/waba'
+    | '/api/public/webhooks/webchat'
     | '/clients/$id'
   id:
     | '__root__'
@@ -274,7 +321,11 @@ export interface FileRouteTypes {
     | '/_authenticated/clients/new'
     | '/_authenticated/clients/'
     | '/_authenticated/clients/$id/edit'
+    | '/api/public/webhooks/evolution'
+    | '/api/public/webhooks/instagram'
     | '/api/public/webhooks/uazapi'
+    | '/api/public/webhooks/waba'
+    | '/api/public/webhooks/webchat'
     | '/_authenticated/clients/$id/'
   fileRoutesById: FileRoutesById
 }
@@ -282,7 +333,11 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiPublicWebhooksEvolutionRoute: typeof ApiPublicWebhooksEvolutionRoute
+  ApiPublicWebhooksInstagramRoute: typeof ApiPublicWebhooksInstagramRoute
   ApiPublicWebhooksUazapiRoute: typeof ApiPublicWebhooksUazapiRoute
+  ApiPublicWebhooksWabaRoute: typeof ApiPublicWebhooksWabaRoute
+  ApiPublicWebhooksWebchatRoute: typeof ApiPublicWebhooksWebchatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -420,11 +475,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedClientsIdIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/webhooks/webchat': {
+      id: '/api/public/webhooks/webchat'
+      path: '/api/public/webhooks/webchat'
+      fullPath: '/api/public/webhooks/webchat'
+      preLoaderRoute: typeof ApiPublicWebhooksWebchatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/webhooks/waba': {
+      id: '/api/public/webhooks/waba'
+      path: '/api/public/webhooks/waba'
+      fullPath: '/api/public/webhooks/waba'
+      preLoaderRoute: typeof ApiPublicWebhooksWabaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/webhooks/uazapi': {
       id: '/api/public/webhooks/uazapi'
       path: '/api/public/webhooks/uazapi'
       fullPath: '/api/public/webhooks/uazapi'
       preLoaderRoute: typeof ApiPublicWebhooksUazapiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/webhooks/instagram': {
+      id: '/api/public/webhooks/instagram'
+      path: '/api/public/webhooks/instagram'
+      fullPath: '/api/public/webhooks/instagram'
+      preLoaderRoute: typeof ApiPublicWebhooksInstagramRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/webhooks/evolution': {
+      id: '/api/public/webhooks/evolution'
+      path: '/api/public/webhooks/evolution'
+      fullPath: '/api/public/webhooks/evolution'
+      preLoaderRoute: typeof ApiPublicWebhooksEvolutionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/clients/$id/edit': {
@@ -484,7 +567,11 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiPublicWebhooksEvolutionRoute: ApiPublicWebhooksEvolutionRoute,
+  ApiPublicWebhooksInstagramRoute: ApiPublicWebhooksInstagramRoute,
   ApiPublicWebhooksUazapiRoute: ApiPublicWebhooksUazapiRoute,
+  ApiPublicWebhooksWabaRoute: ApiPublicWebhooksWabaRoute,
+  ApiPublicWebhooksWebchatRoute: ApiPublicWebhooksWebchatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
