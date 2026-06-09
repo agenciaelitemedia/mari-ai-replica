@@ -41,7 +41,7 @@ function DashboardPage() {
             const Icon = q.icon;
             return (
               <Link key={q.to} to={q.to} className="group">
-                <Card className="relative overflow-hidden border-border/40 hover:border-primary/50 transition-all duration-300 h-full hover:shadow-2xl hover:shadow-primary/5 group-hover:-translate-y-1">
+                <Card className="relative overflow-hidden border-border/40 hover:border-primary/50 transition-all duration-300 h-full hover:shadow-2xl hover:shadow-primary/10 group-hover:-translate-y-2">
                   <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
                     <Icon className="h-24 w-24 -mr-8 -mt-8 rotate-12" />
                   </div>
@@ -82,7 +82,7 @@ function DashboardPage() {
             <p className="text-muted-foreground mb-6 text-lg">
               Estamos portando todas as funcionalidades do AppJulia para a nova infraestrutura. Fique atento às atualizações automáticas do sistema.
             </p>
-            <Button className="rounded-full px-8 h-12 text-base font-semibold shadow-lg shadow-primary/20">
+            <Button className="rounded-2xl px-8 h-12 text-base font-semibold shadow-lg shadow-primary/20">
               Ver roteiro de atualizações
             </Button>
           </div>

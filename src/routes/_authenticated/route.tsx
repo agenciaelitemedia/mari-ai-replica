@@ -120,7 +120,7 @@ function AuthenticatedLayout() {
         ))}
       </nav>
 
-      <div className="p-4 border-t border-border/50 bg-accent/20">
+      <div className="p-4 border-t border-border/40 bg-accent/5 backdrop-blur-sm">
         <div className="bg-card/40 rounded-2xl p-4 flex items-center gap-4 border border-border/40 shadow-sm backdrop-blur-md">
           <Avatar className="h-10 w-10 border-2 border-primary/10 ring-2 ring-background ring-offset-2">
             <AvatarFallback className="bg-linear-to-br from-primary/10 to-primary/5 text-primary font-bold">
@@ -148,7 +148,7 @@ function AuthenticatedLayout() {
   return (
     <div className="min-h-screen flex bg-muted/30 font-sans selection:bg-primary/10 selection:text-primary">
       {/* Sidebar Desktop */}
-      <aside className="hidden md:flex w-72 shrink-0 flex-col border-r bg-card/50 backdrop-blur-xl sticky top-0 h-screen">
+      <aside className="hidden md:flex w-72 shrink-0 flex-col border-r border-border/40 bg-card/30 backdrop-blur-2xl sticky top-0 h-screen transition-all duration-300">
         {navContent}
       </aside>
 
