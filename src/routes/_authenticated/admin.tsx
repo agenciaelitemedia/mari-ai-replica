@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { useAuth } from '@/contexts/AuthContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -23,6 +24,7 @@ export const Route = createFileRoute('/_authenticated/admin')({
 });
 
 function AdminPage() {
+  const { isSuperAdmin } = useAuth();
   const [activeTab, setActiveTab] = useState<'permissions' | 'modules' | 'plans' | 'clients'>('permissions');
 
   return (
@@ -37,40 +39,48 @@ function AdminPage() {
       </header>
 
       <Tabs value={activeTab} onValueChange={(v: any) => setActiveTab(v)} className="w-full">
-        <TabsList className="grid w-full max-w-2xl grid-cols-4 bg-muted/50 p-1.5 h-14 rounded-2xl mb-8">
+        <TabsList className={`grid w-full ${isSuperAdmin ? 'max-w-2xl grid-cols-4' : 'max-w-md grid-cols-1'} bg-muted/50 p-1.5 h-14 rounded-2xl mb-8`}>
           <TabsTrigger value="permissions" className="flex items-center gap-2 rounded-xl data-[state=active]:shadow-md font-bold text-sm">
             <Shield className="h-4 w-4" />
             Permissões
           </TabsTrigger>
-          <TabsTrigger value="modules" className="flex items-center gap-2 rounded-xl data-[state=active]:shadow-md font-bold text-sm">
-            <Layers className="h-4 w-4" />
-            Módulos
-          </TabsTrigger>
-          <TabsTrigger value="plans" className="flex items-center gap-2 rounded-xl data-[state=active]:shadow-md font-bold text-sm">
-            <Package className="h-4 w-4" />
-            Planos
-          </TabsTrigger>
-          <TabsTrigger value="clients" className="flex items-center gap-2 rounded-xl data-[state=active]:shadow-md font-bold text-sm">
-            <User className="h-4 w-4" />
-            Clientes
-          </TabsTrigger>
+          {isSuperAdmin && (
+            <>
+              <TabsTrigger value="modules" className="flex items-center gap-2 rounded-xl data-[state=active]:shadow-md font-bold text-sm">
+                <Layers className="h-4 w-4" />
+                Módulos
+              </TabsTrigger>
+              <TabsTrigger value="plans" className="flex items-center gap-2 rounded-xl data-[state=active]:shadow-md font-bold text-sm">
+                <Package className="h-4 w-4" />
+                Planos
+              </TabsTrigger>
+              <TabsTrigger value="clients" className="flex items-center gap-2 rounded-xl data-[state=active]:shadow-md font-bold text-sm">
+                <User className="h-4 w-4" />
+                Clientes
+              </TabsTrigger>
+            </>
+          )}
         </TabsList>
 
         <TabsContent value="permissions" className="mt-6 space-y-6">
           <PermissionsMatrix />
         </TabsContent>
 
-        <TabsContent value="modules" className="mt-6 space-y-6">
-          <ModulesManagement />
-        </TabsContent>
+        {isSuperAdmin && (
+          <>
+            <TabsContent value="modules" className="mt-6 space-y-6">
+              <ModulesManagement />
+            </TabsContent>
 
-        <TabsContent value="plans" className="mt-6 space-y-6">
-          <PlansManagement />
-        </TabsContent>
+            <TabsContent value="plans" className="mt-6 space-y-6">
+              <PlansManagement />
+            </TabsContent>
 
-        <TabsContent value="clients" className="mt-6 space-y-6">
-          <ClientsManagement />
-        </TabsContent>
+            <TabsContent value="clients" className="mt-6 space-y-6">
+              <ClientsManagement />
+            </TabsContent>
+          </>
+        )}
       </Tabs>
     </div>
   );
