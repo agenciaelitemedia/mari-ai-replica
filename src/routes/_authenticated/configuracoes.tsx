@@ -118,9 +118,6 @@ function SettingsPage() {
         onClose={() => setQueueOpen(false)}
         queue={editingQ}
         providers={providers}
-        clients={clients}
-        isSuperAdmin={isSuperAdmin}
-        defaultClientId={defaultClientId}
         onSave={(data) => saveQ(data, { onSuccess: () => setQueueOpen(false) } as any)}
         isSaving={savingQ}
       />
