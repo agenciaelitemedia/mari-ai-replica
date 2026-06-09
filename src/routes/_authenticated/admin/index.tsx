@@ -11,7 +11,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import type { AppRole, Module } from '@/types/permissions';
 
-export const Route = createFileRoute('/_authenticated/admin')({
+export const Route = createFileRoute('/_authenticated/admin/')({
   component: PermissionsMatrixPage,
 });
 
