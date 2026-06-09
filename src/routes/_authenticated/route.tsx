@@ -47,16 +47,16 @@ function AuthenticatedLayout() {
 
   const navContent = (
     <>
-      <div className="h-20 flex items-center px-8 border-b border-border/50 shrink-0">
+      <div className="h-20 flex items-center px-6 border-b border-border/50 shrink-0">
         <Link 
           to="/dashboard" 
           className="flex items-center gap-2 group transition-all duration-300"
           onClick={() => setIsMobileMenuOpen(false)}
         >
-          <div className="h-10 w-10 bg-linear-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform">
-            <Sparkles className="h-6 w-6 text-primary-foreground" />
+          <div className="h-9 w-9 bg-primary rounded-lg flex items-center justify-center shadow-md shadow-primary/20 group-hover:scale-105 transition-transform">
+            <Sparkles className="h-5 w-5 text-primary-foreground" />
           </div>
-          <span className="text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-linear-to-r from-foreground to-foreground/70">
+          <span className="text-xl font-bold tracking-tight text-foreground">
             Mar<span className="text-primary">I.A</span>
           </span>
         </Link>
@@ -95,20 +95,20 @@ function AuthenticatedLayout() {
                     key={item.id}
                     to={item.route || '/'}
                     className={cn(
-                      "group flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200 relative",
+                      "group flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-semibold transition-all duration-200 relative",
                       active
-                        ? "bg-primary text-primary-foreground shadow-md shadow-primary/10"
-                        : "text-muted-foreground hover:bg-accent/50 hover:text-foreground hover:translate-x-1",
+                        ? "bg-primary/10 text-primary shadow-none"
+                        : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
                     )}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     {active && (
-                      <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary-foreground rounded-r-full" />
+                      <span className="absolute left-[-12px] top-1/2 -translate-y-1/2 w-1 h-5 bg-primary rounded-r-full" />
                     )}
                     {IconComponent && (
                       <IconComponent className={cn(
-                        "h-5 w-5 transition-colors",
-                        active ? "text-primary-foreground" : "text-muted-foreground group-hover:text-primary"
+                        "h-4.5 w-4.5 transition-colors",
+                        active ? "text-primary" : "text-muted-foreground group-hover:text-primary"
                       )} />
                     )}
                     <span className="truncate">{item.name}</span>
@@ -148,7 +148,7 @@ function AuthenticatedLayout() {
   return (
     <div className="min-h-screen flex bg-muted/30 font-sans selection:bg-primary/10 selection:text-primary">
       {/* Sidebar Desktop */}
-      <aside className="hidden md:flex w-72 shrink-0 flex-col border-r border-border/40 bg-card/30 backdrop-blur-2xl sticky top-0 h-screen transition-all duration-300">
+      <aside className="hidden md:flex w-64 shrink-0 flex-col border-r border-border/50 bg-card sticky top-0 h-screen transition-all duration-300">
         {navContent}
       </aside>
 
