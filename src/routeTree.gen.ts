@@ -13,6 +13,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedTelefoniaRouteImport } from './routes/_authenticated/telefonia'
+import { Route as AuthenticatedPlansRouteImport } from './routes/_authenticated/plans'
 import { Route as AuthenticatedLegalCasesRouteImport } from './routes/_authenticated/legal-cases'
 import { Route as AuthenticatedEquipeRouteImport } from './routes/_authenticated/equipe'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -43,6 +44,11 @@ const IndexRoute = IndexRouteImport.update({
 const AuthenticatedTelefoniaRoute = AuthenticatedTelefoniaRouteImport.update({
   id: '/telefonia',
   path: '/telefonia',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPlansRoute = AuthenticatedPlansRouteImport.update({
+  id: '/plans',
+  path: '/plans',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedLegalCasesRoute = AuthenticatedLegalCasesRouteImport.update({
@@ -121,6 +127,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/equipe': typeof AuthenticatedEquipeRoute
   '/legal-cases': typeof AuthenticatedLegalCasesRoute
+  '/plans': typeof AuthenticatedPlansRoute
   '/telefonia': typeof AuthenticatedTelefoniaRoute
   '/api/public/webhooks/uazapi': typeof ApiPublicWebhooksUazapiRoute
 }
@@ -138,6 +145,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/equipe': typeof AuthenticatedEquipeRoute
   '/legal-cases': typeof AuthenticatedLegalCasesRoute
+  '/plans': typeof AuthenticatedPlansRoute
   '/telefonia': typeof AuthenticatedTelefoniaRoute
   '/api/public/webhooks/uazapi': typeof ApiPublicWebhooksUazapiRoute
 }
@@ -157,6 +165,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/equipe': typeof AuthenticatedEquipeRoute
   '/_authenticated/legal-cases': typeof AuthenticatedLegalCasesRoute
+  '/_authenticated/plans': typeof AuthenticatedPlansRoute
   '/_authenticated/telefonia': typeof AuthenticatedTelefoniaRoute
   '/api/public/webhooks/uazapi': typeof ApiPublicWebhooksUazapiRoute
 }
@@ -176,6 +185,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/equipe'
     | '/legal-cases'
+    | '/plans'
     | '/telefonia'
     | '/api/public/webhooks/uazapi'
   fileRoutesByTo: FileRoutesByTo
@@ -193,6 +203,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/equipe'
     | '/legal-cases'
+    | '/plans'
     | '/telefonia'
     | '/api/public/webhooks/uazapi'
   id:
@@ -211,6 +222,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/equipe'
     | '/_authenticated/legal-cases'
+    | '/_authenticated/plans'
     | '/_authenticated/telefonia'
     | '/api/public/webhooks/uazapi'
   fileRoutesById: FileRoutesById
@@ -250,6 +262,13 @@ declare module '@tanstack/react-router' {
       path: '/telefonia'
       fullPath: '/telefonia'
       preLoaderRoute: typeof AuthenticatedTelefoniaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/plans': {
+      id: '/_authenticated/plans'
+      path: '/plans'
+      fullPath: '/plans'
+      preLoaderRoute: typeof AuthenticatedPlansRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/legal-cases': {
@@ -351,6 +370,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedEquipeRoute: typeof AuthenticatedEquipeRoute
   AuthenticatedLegalCasesRoute: typeof AuthenticatedLegalCasesRoute
+  AuthenticatedPlansRoute: typeof AuthenticatedPlansRoute
   AuthenticatedTelefoniaRoute: typeof AuthenticatedTelefoniaRoute
 }
 
@@ -366,6 +386,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedEquipeRoute: AuthenticatedEquipeRoute,
   AuthenticatedLegalCasesRoute: AuthenticatedLegalCasesRoute,
+  AuthenticatedPlansRoute: AuthenticatedPlansRoute,
   AuthenticatedTelefoniaRoute: AuthenticatedTelefoniaRoute,
 }
 
@@ -381,3 +402,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
