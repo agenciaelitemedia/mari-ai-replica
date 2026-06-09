@@ -16,29 +16,22 @@ interface Props {
   open: boolean
   onClose: () => void
   provider: any | null
-  clients: Array<{ id: string; name: string }>
-  isSuperAdmin: boolean
-  defaultClientId?: string | null
   onSave: (data: any) => void
   isSaving?: boolean
 }
 
-export function ProviderDialog({ open, onClose, provider, clients, isSuperAdmin, defaultClientId, onSave, isSaving }: Props) {
+export function ProviderDialog({ open, onClose, provider, onSave, isSaving }: Props) {
   const isEditing = !!provider
 
-  const [clientId, setClientId] = useState<string>('')
   const [isActive, setIsActive] = useState(true)
   const [name, setName] = useState('')
   const [providerType, setProviderType] = useState<ProviderType>('uazapi')
-  // UaZapi
   const [evoUrl, setEvoUrl] = useState('')
   const [evoApikey, setEvoApikey] = useState('')
-  // WABA
   const [metaAppId, setMetaAppId] = useState('')
   const [metaAppSecret, setMetaAppSecret] = useState('')
   const [wabaBusinessId, setWabaBusinessId] = useState('')
   const [wabaToken, setWabaToken] = useState('')
-  // Instagram
   const [instagramPageId, setInstagramPageId] = useState('')
   const [instagramUserId, setInstagramUserId] = useState('')
   const [pageAccessToken, setPageAccessToken] = useState('')
@@ -47,7 +40,6 @@ export function ProviderDialog({ open, onClose, provider, clients, isSuperAdmin,
   useEffect(() => {
     if (!open) return
     if (provider) {
-      setClientId(provider.client_id || defaultClientId || '')
       setIsActive(!!provider.is_active)
       setName(provider.name || '')
       setProviderType(provider.provider_type as ProviderType)
@@ -62,26 +54,22 @@ export function ProviderDialog({ open, onClose, provider, clients, isSuperAdmin,
       setPageAccessToken(provider.page_access_token || '')
       setPageName(provider.page_name || '')
     } else {
-      setClientId(defaultClientId || '')
       setIsActive(true)
       setName(''); setProviderType('uazapi')
       setEvoUrl(''); setEvoApikey('')
       setMetaAppId(''); setMetaAppSecret(''); setWabaBusinessId(''); setWabaToken('')
       setInstagramPageId(''); setInstagramUserId(''); setPageAccessToken(''); setPageName('')
     }
-  }, [provider, open, defaultClientId])
+  }, [provider, open])
 
   const handleSubmit = () => {
-    if (!name.trim() || !clientId) return
-
+    if (!name.trim()) return
     const data: Record<string, any> = {
       ...(provider?.id ? { id: provider.id } : {}),
-      client_id: clientId,
       name: name.trim(),
       provider_type: providerType,
       is_active: isActive,
     }
-
     if (providerType === 'uazapi') {
       data.evo_url = evoUrl || null
       data.evo_apikey = evoApikey || null
@@ -96,7 +84,6 @@ export function ProviderDialog({ open, onClose, provider, clients, isSuperAdmin,
       data.page_access_token = pageAccessToken || null
       data.page_name = pageName || null
     }
-
     onSave(data)
   }
 
@@ -106,23 +93,11 @@ export function ProviderDialog({ open, onClose, provider, clients, isSuperAdmin,
         <DialogHeader>
           <DialogTitle>{isEditing ? 'Editar Provedor' : 'Novo Provedor'}</DialogTitle>
           <DialogDescription>
-            {isEditing ? 'Atualize as credenciais do provedor.' : 'Configure um novo provedor de comunicação.'}
+            Provedor global — compartilhado entre todos os clientes para uso nas suas filas.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
-          {isSuperAdmin && (
-            <div>
-              <Label>Cliente</Label>
-              <Select value={clientId} onValueChange={setClientId}>
-                <SelectTrigger><SelectValue placeholder="Selecione um cliente" /></SelectTrigger>
-                <SelectContent>
-                  {clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
           <div>
             <Label>Nome do Provedor</Label>
             <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex: WhatsApp Principal" />
@@ -243,7 +218,7 @@ export function ProviderDialog({ open, onClose, provider, clients, isSuperAdmin,
 
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>Cancelar</Button>
-          <Button onClick={handleSubmit} disabled={!name.trim() || !clientId || isSaving}>
+          <Button onClick={handleSubmit} disabled={!name.trim() || isSaving}>
             {isSaving ? 'Salvando…' : isEditing ? 'Salvar alterações' : 'Criar provedor'}
           </Button>
         </DialogFooter>

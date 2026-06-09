@@ -2,15 +2,13 @@ import { ProviderCard } from './ProviderCard'
 
 interface Props {
   providers: any[]
-  clientsById?: Record<string, string>
-  showClient?: boolean
   onEdit: (provider: any) => void
   onDelete: (id: string) => void
   onTest?: (id: string) => void
   isTesting?: boolean
 }
 
-export function ProvidersList({ providers, clientsById, showClient, onEdit, onDelete, onTest, isTesting }: Props) {
+export function ProvidersList({ providers, onEdit, onDelete, onTest, isTesting }: Props) {
   if (!providers.length) {
     return (
       <div className="text-center py-12 text-muted-foreground">
@@ -24,8 +22,6 @@ export function ProvidersList({ providers, clientsById, showClient, onEdit, onDe
         <ProviderCard
           key={p.id}
           provider={p}
-          clientName={clientsById?.[p.client_id]}
-          showClient={showClient}
           onEdit={onEdit}
           onDelete={(prov) => onDelete(prov.id)}
           onTest={onTest}
