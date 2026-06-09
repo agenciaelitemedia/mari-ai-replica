@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Shield, User, Globe, Save } from 'lucide-react';
+import { Loader2, Shield, User, Globe, Layers } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import type { AppRole, Module } from '@/types/permissions';
@@ -112,6 +112,14 @@ function PermissionsMatrixPage() {
           <p className="text-muted-foreground">
             Gerencie o que cada perfil ou usuário pode fazer em cada módulo
           </p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" asChild>
+            <Link to="/admin/modulos">
+              <Layers className="mr-2 h-4 w-4" />
+              Gerenciar Módulos
+            </Link>
+          </Button>
         </div>
       </div>
 
