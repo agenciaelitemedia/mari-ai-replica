@@ -1,6 +1,6 @@
 import { Link, useNavigate } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
-import { Loader2, UserPlus, Search, Eye, Mail, Phone, Layout, Building, Pencil } from 'lucide-react';
+import { Loader2, UserPlus, Search, Eye, Mail, Phone, Layout, Building, Pencil, Trash2 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
