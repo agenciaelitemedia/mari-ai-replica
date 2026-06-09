@@ -107,8 +107,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       supabase.from('user_roles').select('role').eq('user_id', user.id)
     ]);
 
+    if (profileRes.error) console.error('Profile fetch error:', profileRes.error);
+    if (rolesRes.error) console.error('Roles fetch error:', rolesRes.error);
+
     if (profileRes.data) setProfile(profileRes.data);
-    if (rolesRes.data) setUserRoles(rolesRes.data.map(r => r.role));
+    if (rolesRes.data) {
+      const roles = rolesRes.data.map(r => r.role);
+      console.log('User roles loaded:', roles);
+      setUserRoles(roles);
+    }
   }, [user]);
 
   useEffect(() => {
