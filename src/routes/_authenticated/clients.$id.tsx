@@ -103,8 +103,16 @@ function ClientDetailPage() {
             <div className="flex items-center gap-2">
               <code className="px-3 py-1.5 rounded-md bg-muted font-mono text-sm">{client.temporary_password || '-'}</code>
               {client.temporary_password && (
-                <Button size="icon" variant="ghost" onClick={copyPwd} className="h-8 w-8">
-                  {copied ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={copyError ? 'destructive' : copied ? 'default' : 'outline'}
+                  onClick={copyPwd}
+                  className="h-8 gap-1.5 rounded-md transition-all"
+                  aria-label="Copiar senha"
+                >
+                  {copyError ? <X className="h-3.5 w-3.5" /> : copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                  {copyError ? 'Falhou' : copied ? 'Copiado!' : 'Copiar'}
                 </Button>
               )}
             </div>
@@ -118,9 +126,9 @@ function ClientDetailPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Field label="Nome" value={client.name} />
           <Field label="Razão Social" value={client.business_name} />
-          <Field label="CPF/CNPJ" value={client.federal_id} />
+          <Field label="CPF/CNPJ" value={client.federal_id ? maskCpfCnpj(client.federal_id) : ''} />
           <Field label="Email" value={client.email} />
-          <Field label="Telefone" value={client.phone} />
+          <Field label="Telefone" value={client.phone ? maskPhone(client.phone) : ''} />
           <Field label="Endereço" value={fullAddress} />
         </div>
       </Card>
