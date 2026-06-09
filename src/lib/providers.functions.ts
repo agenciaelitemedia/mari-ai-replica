@@ -56,9 +56,7 @@ export const upsertProvider = createServerFn({ method: 'POST' })
     if (payload.provider_type === 'webchat' && !payload.widget_key) {
       payload.widget_key = generateRandomKey('wc')
     }
-    if ((payload.provider_type === 'waba' || payload.provider_type === 'instagram') && !payload.verify_token) {
-      payload.verify_token = generateRandomKey('vt')
-    }
+
 
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
     const { data: row, error } = await supabaseAdmin
@@ -114,27 +112,20 @@ export const testProvider = createServerFn({ method: 'POST' })
 
     try {
       if (p.provider_type === 'uazapi') {
-        const r = await fetch(`${p.evo_url!.replace(/\/$/, '')}/instance/status`, {
-          headers: { token: p.evo_apikey ?? '' },
+        const r = await fetch(`${(p.evo_url ?? '').replace(/\/$/, '')}/instance/all`, {
+          headers: { admintoken: p.evo_apikey ?? '' },
         })
         return { ok: r.ok, status: r.status, body: await r.text().catch(() => '') }
       }
-      if (p.provider_type === 'evolution') {
-        const r = await fetch(
-          `${p.evo_url!.replace(/\/$/, '')}/instance/connectionState/${p.instance_name}`,
-          { headers: { apikey: p.evo_apikey ?? '' } },
-        )
-        return { ok: r.ok, status: r.status, body: await r.text().catch(() => '') }
-      }
       if (p.provider_type === 'waba') {
-        const r = await fetch(`https://graph.facebook.com/v20.0/${p.phone_number_id}`, {
-          headers: { Authorization: `Bearer ${p.access_token}` },
+        const r = await fetch(`https://graph.facebook.com/v20.0/${p.waba_business_id}`, {
+          headers: { Authorization: `Bearer ${p.waba_token}` },
         })
         return { ok: r.ok, status: r.status, body: await r.text().catch(() => '') }
       }
       if (p.provider_type === 'instagram') {
-        const r = await fetch(`https://graph.facebook.com/v20.0/${p.ig_business_id}`, {
-          headers: { Authorization: `Bearer ${p.access_token}` },
+        const r = await fetch(`https://graph.facebook.com/v20.0/${p.instagram_user_id}`, {
+          headers: { Authorization: `Bearer ${p.page_access_token}` },
         })
         return { ok: r.ok, status: r.status, body: await r.text().catch(() => '') }
       }
@@ -146,6 +137,7 @@ export const testProvider = createServerFn({ method: 'POST' })
       return { ok: false, status: 0, body: e?.message ?? 'erro' }
     }
   })
+
 
 // ============ Queues ============
 
@@ -241,18 +233,17 @@ export const upsertQueueFull = createServerFn({ method: 'POST' })
       client_id: data.client_id,
       provider_id: data.provider_id,
       name: data.name,
-      phone_number: data.phone_number ?? prov.phone_number ?? null,
+      phone_number: data.phone_number ?? null,
       channel_type: prov.provider_type,
       evo_url: prov.evo_url,
       evo_apikey: prov.evo_apikey,
-      evo_instance: prov.instance_name,
-      waba_id: prov.waba_id,
-      waba_token: prov.access_token,
-      waba_number_id: prov.phone_number_id,
+      waba_id: prov.waba_business_id,
+      waba_token: prov.waba_token,
       is_active: data.is_active,
       settings: data.settings ?? {},
       metadata: { provider_snapshot: { type: prov.provider_type, name: prov.name } },
     }
+
     if (data.id) payload.id = data.id
 
     const { data: row, error } = await supabaseAdmin.from('queues').upsert(payload).select('*').single()

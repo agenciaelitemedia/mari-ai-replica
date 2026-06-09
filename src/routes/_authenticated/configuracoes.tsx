@@ -8,8 +8,7 @@ import { toast } from 'sonner'
 import { useAuth } from '@/contexts/AuthContext'
 import { useProvidersAdmin } from '@/hooks/useProvidersAdmin'
 import { useQueuesAdmin } from '@/hooks/useQueuesAdmin'
-import { ProvidersList } from '@/components/admin/providers/ProvidersList'
-import { ProviderDialog } from '@/components/admin/providers/ProviderDialog'
+import { ProvidersPanel } from '@/components/admin/providers/ProvidersPanel'
 import { QueuesList } from '@/components/admin/queues/QueuesList'
 import { QueueDialog } from '@/components/admin/queues/QueueDialog'
 import { confirmDelete } from '@/lib/swal'
@@ -23,21 +22,14 @@ function SettingsPage() {
   const { isSuperAdmin, profile } = useAuth()
   const defaultClientId = profile?.client_id ?? null
 
-  const { providers, isLoading: loadingProv, save: saveProv, isSaving: savingProv, remove: removeProv, test: testProv, isTesting } =
-    useProvidersAdmin()
+  const { providers } = useProvidersAdmin()
   const { queues, isLoading: loadingQ, clients, save: saveQ, isSaving: savingQ, remove: removeQ } = useQueuesAdmin()
 
   const clientsById = useMemo(() => Object.fromEntries(clients.map((c) => [c.id, c.name])), [clients])
 
-  const [provOpen, setProvOpen] = useState(false)
-  const [editingProv, setEditingProv] = useState<any | null>(null)
   const [queueOpen, setQueueOpen] = useState(false)
   const [editingQ, setEditingQ] = useState<any | null>(null)
 
-  const handleDeleteProv = async (id: string) => {
-    const ok = await confirmDelete({ title: 'Excluir provedor?', text: 'A exclusão será bloqueada se houver filas vinculadas.' })
-    if (ok) removeProv(id)
-  }
   const handleDeleteQ = async (id: string) => {
     const ok = await confirmDelete({ title: 'Excluir fila?', text: 'Esta ação não pode ser desfeita.' })
     if (ok) removeQ(id)
@@ -66,31 +58,7 @@ function SettingsPage() {
         </TabsList>
 
         <TabsContent value="providers" className="space-y-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle>Provedores de canais</CardTitle>
-                <CardDescription>UazAPI, Evolution, WABA Oficial, Instagram e Webchat</CardDescription>
-              </div>
-              <Button onClick={() => { setEditingProv(null); setProvOpen(true) }}>
-                <Plus className="h-4 w-4 mr-1" /> Novo provedor
-              </Button>
-            </CardHeader>
-            <CardContent>
-              {loadingProv ? (
-                <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary h-8 w-8" /></div>
-              ) : (
-                <ProvidersList
-                  providers={providers}
-                  clientsById={clientsById}
-                  onEdit={(p) => { setEditingProv(p); setProvOpen(true) }}
-                  onDelete={handleDeleteProv}
-                  onTest={testProv}
-                  isTesting={isTesting}
-                />
-              )}
-            </CardContent>
-          </Card>
+          <ProvidersPanel />
         </TabsContent>
 
         <TabsContent value="queues" className="space-y-4">
@@ -118,7 +86,6 @@ function SettingsPage() {
           {providers.map((p) => {
             const url =
               p.provider_type === 'uazapi' ? `${base}/uazapi?queue_id=<ID_DA_FILA>&token=${p.evo_apikey ?? ''}` :
-              p.provider_type === 'evolution' ? `${base}/evolution?provider_id=${p.id}` :
               p.provider_type === 'waba' ? `${base}/waba?provider_id=${p.id}` :
               p.provider_type === 'instagram' ? `${base}/instagram?provider_id=${p.id}` :
               `${base}/webchat?key=${p.widget_key ?? ''}`
@@ -133,9 +100,6 @@ function SettingsPage() {
                     <code className="flex-1 text-xs bg-muted rounded-lg p-2 break-all">{url}</code>
                     <Button size="sm" variant="outline" onClick={() => copy(url)}><Copy className="h-4 w-4" /></Button>
                   </div>
-                  {(p.provider_type === 'waba' || p.provider_type === 'instagram') && p.verify_token && (
-                    <p className="text-xs text-muted-foreground">Verify token: <code className="bg-muted px-1 rounded">{p.verify_token}</code></p>
-                  )}
                   {p.provider_type === 'webchat' && p.widget_key && (
                     <pre className="text-xs bg-muted rounded-lg p-2 overflow-x-auto">{`<script src="${base.replace('/webhooks','')}/widget.js?key=${p.widget_key}"></script>`}</pre>
                   )}
@@ -148,17 +112,6 @@ function SettingsPage() {
           )}
         </TabsContent>
       </Tabs>
-
-      <ProviderDialog
-        open={provOpen}
-        onClose={() => setProvOpen(false)}
-        provider={editingProv}
-        clients={clients}
-        isSuperAdmin={isSuperAdmin}
-        defaultClientId={defaultClientId}
-        onSave={(data) => saveProv(data, { onSuccess: () => setProvOpen(false) } as any)}
-        isSaving={savingProv}
-      />
 
       <QueueDialog
         open={queueOpen}
@@ -174,3 +127,4 @@ function SettingsPage() {
     </div>
   )
 }
+
