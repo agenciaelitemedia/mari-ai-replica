@@ -118,3 +118,19 @@ export function useUpdateClient() {
     onError: (e: any) => toast.error(e.message),
   });
 }
+
+export function useDeleteClient() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('clients').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['admin-clients'] });
+      toast.success('Cliente excluído com sucesso');
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+}
+

@@ -1,10 +1,11 @@
 import { Link, useNavigate } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
-import { Loader2, UserPlus, Search, Eye, Mail, Phone, Layout, Building } from 'lucide-react';
+import { Loader2, UserPlus, Search, Eye, Mail, Phone, Layout, Building, Pencil, Trash2 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { useClientsList } from '@/hooks/useClientsAdmin';
+import { DeleteClientDialog } from './DeleteClientDialog';
 import { useState } from 'react';
 
 export function ClientsManagement() {
@@ -83,9 +84,23 @@ export function ClientsManagement() {
                     </div>
                   </TableCell>
                   <TableCell className="py-4 text-right px-6" onClick={(e) => e.stopPropagation()}>
-                    <Button asChild variant="ghost" size="icon" className="h-9 w-9 rounded-lg hover:bg-primary/10">
-                      <Link to="/clients/$id" params={{ id: c.id }}><Eye className="h-4 w-4" /></Link>
-                    </Button>
+                    <div className="flex justify-end gap-1">
+                      <Button asChild variant="ghost" size="icon" className="h-9 w-9 rounded-lg hover:bg-primary/10" title="Visualizar">
+                        <Link to="/clients/$id" params={{ id: c.id }}><Eye className="h-4 w-4" /></Link>
+                      </Button>
+                      <Button asChild variant="ghost" size="icon" className="h-9 w-9 rounded-lg hover:bg-primary/10" title="Editar">
+                        <Link to="/clients/$id/edit" params={{ id: c.id }}><Pencil className="h-4 w-4" /></Link>
+                      </Button>
+                      <DeleteClientDialog
+                        clientId={c.id}
+                        clientName={c.name}
+                        trigger={
+                          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg hover:bg-destructive/10 text-destructive" title="Excluir">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        }
+                      />
+                    </div>
                   </TableCell>
                 </TableRow>
               ))
