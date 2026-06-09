@@ -4,11 +4,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import type { Module } from '@/types/permissions';
 
 export interface MenuModule extends Module {
-  icon?: string | null;
-  route?: string | null;
-  menu_group?: string | null;
-  is_menu_visible?: boolean | null;
+  icon: string | null;
+  route: string | null;
+  menu_group: string | null;
+  is_menu_visible: boolean | null;
 }
+
 
 export interface GroupedMenuModules {
   [groupName: string]: MenuModule[];
