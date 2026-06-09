@@ -13,6 +13,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedTelefoniaRouteImport } from './routes/_authenticated/telefonia'
+import { Route as AuthenticatedPlansRouteImport } from './routes/_authenticated/plans'
 import { Route as AuthenticatedLegalCasesRouteImport } from './routes/_authenticated/legal-cases'
 import { Route as AuthenticatedEquipeRouteImport } from './routes/_authenticated/equipe'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -21,6 +22,7 @@ import { Route as AuthenticatedCriativosRouteImport } from './routes/_authentica
 import { Route as AuthenticatedContatosRouteImport } from './routes/_authenticated/contatos'
 import { Route as AuthenticatedConfiguracoesRouteImport } from './routes/_authenticated/configuracoes'
 import { Route as AuthenticatedComercialRouteImport } from './routes/_authenticated/comercial'
+import { Route as AuthenticatedClientsRouteImport } from './routes/_authenticated/clients'
 import { Route as AuthenticatedChatRouteImport } from './routes/_authenticated/chat'
 import { Route as AuthenticatedAgentesRouteImport } from './routes/_authenticated/agentes'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
@@ -43,6 +45,11 @@ const IndexRoute = IndexRouteImport.update({
 const AuthenticatedTelefoniaRoute = AuthenticatedTelefoniaRouteImport.update({
   id: '/telefonia',
   path: '/telefonia',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPlansRoute = AuthenticatedPlansRouteImport.update({
+  id: '/plans',
+  path: '/plans',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedLegalCasesRoute = AuthenticatedLegalCasesRouteImport.update({
@@ -86,6 +93,11 @@ const AuthenticatedComercialRoute = AuthenticatedComercialRouteImport.update({
   path: '/comercial',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedClientsRoute = AuthenticatedClientsRouteImport.update({
+  id: '/clients',
+  path: '/clients',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedChatRoute = AuthenticatedChatRouteImport.update({
   id: '/chat',
   path: '/chat',
@@ -113,6 +125,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRoute
   '/agentes': typeof AuthenticatedAgentesRoute
   '/chat': typeof AuthenticatedChatRoute
+  '/clients': typeof AuthenticatedClientsRoute
   '/comercial': typeof AuthenticatedComercialRoute
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/contatos': typeof AuthenticatedContatosRoute
@@ -121,6 +134,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/equipe': typeof AuthenticatedEquipeRoute
   '/legal-cases': typeof AuthenticatedLegalCasesRoute
+  '/plans': typeof AuthenticatedPlansRoute
   '/telefonia': typeof AuthenticatedTelefoniaRoute
   '/api/public/webhooks/uazapi': typeof ApiPublicWebhooksUazapiRoute
 }
@@ -130,6 +144,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminRoute
   '/agentes': typeof AuthenticatedAgentesRoute
   '/chat': typeof AuthenticatedChatRoute
+  '/clients': typeof AuthenticatedClientsRoute
   '/comercial': typeof AuthenticatedComercialRoute
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/contatos': typeof AuthenticatedContatosRoute
@@ -138,6 +153,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/equipe': typeof AuthenticatedEquipeRoute
   '/legal-cases': typeof AuthenticatedLegalCasesRoute
+  '/plans': typeof AuthenticatedPlansRoute
   '/telefonia': typeof AuthenticatedTelefoniaRoute
   '/api/public/webhooks/uazapi': typeof ApiPublicWebhooksUazapiRoute
 }
@@ -149,6 +165,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/agentes': typeof AuthenticatedAgentesRoute
   '/_authenticated/chat': typeof AuthenticatedChatRoute
+  '/_authenticated/clients': typeof AuthenticatedClientsRoute
   '/_authenticated/comercial': typeof AuthenticatedComercialRoute
   '/_authenticated/configuracoes': typeof AuthenticatedConfiguracoesRoute
   '/_authenticated/contatos': typeof AuthenticatedContatosRoute
@@ -157,6 +174,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/equipe': typeof AuthenticatedEquipeRoute
   '/_authenticated/legal-cases': typeof AuthenticatedLegalCasesRoute
+  '/_authenticated/plans': typeof AuthenticatedPlansRoute
   '/_authenticated/telefonia': typeof AuthenticatedTelefoniaRoute
   '/api/public/webhooks/uazapi': typeof ApiPublicWebhooksUazapiRoute
 }
@@ -168,6 +186,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/agentes'
     | '/chat'
+    | '/clients'
     | '/comercial'
     | '/configuracoes'
     | '/contatos'
@@ -176,6 +195,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/equipe'
     | '/legal-cases'
+    | '/plans'
     | '/telefonia'
     | '/api/public/webhooks/uazapi'
   fileRoutesByTo: FileRoutesByTo
@@ -185,6 +205,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/agentes'
     | '/chat'
+    | '/clients'
     | '/comercial'
     | '/configuracoes'
     | '/contatos'
@@ -193,6 +214,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/equipe'
     | '/legal-cases'
+    | '/plans'
     | '/telefonia'
     | '/api/public/webhooks/uazapi'
   id:
@@ -203,6 +225,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/agentes'
     | '/_authenticated/chat'
+    | '/_authenticated/clients'
     | '/_authenticated/comercial'
     | '/_authenticated/configuracoes'
     | '/_authenticated/contatos'
@@ -211,6 +234,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/equipe'
     | '/_authenticated/legal-cases'
+    | '/_authenticated/plans'
     | '/_authenticated/telefonia'
     | '/api/public/webhooks/uazapi'
   fileRoutesById: FileRoutesById
@@ -250,6 +274,13 @@ declare module '@tanstack/react-router' {
       path: '/telefonia'
       fullPath: '/telefonia'
       preLoaderRoute: typeof AuthenticatedTelefoniaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/plans': {
+      id: '/_authenticated/plans'
+      path: '/plans'
+      fullPath: '/plans'
+      preLoaderRoute: typeof AuthenticatedPlansRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/legal-cases': {
@@ -308,6 +339,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedComercialRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/clients': {
+      id: '/_authenticated/clients'
+      path: '/clients'
+      fullPath: '/clients'
+      preLoaderRoute: typeof AuthenticatedClientsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/chat': {
       id: '/_authenticated/chat'
       path: '/chat'
@@ -343,6 +381,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedAgentesRoute: typeof AuthenticatedAgentesRoute
   AuthenticatedChatRoute: typeof AuthenticatedChatRoute
+  AuthenticatedClientsRoute: typeof AuthenticatedClientsRoute
   AuthenticatedComercialRoute: typeof AuthenticatedComercialRoute
   AuthenticatedConfiguracoesRoute: typeof AuthenticatedConfiguracoesRoute
   AuthenticatedContatosRoute: typeof AuthenticatedContatosRoute
@@ -351,6 +390,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedEquipeRoute: typeof AuthenticatedEquipeRoute
   AuthenticatedLegalCasesRoute: typeof AuthenticatedLegalCasesRoute
+  AuthenticatedPlansRoute: typeof AuthenticatedPlansRoute
   AuthenticatedTelefoniaRoute: typeof AuthenticatedTelefoniaRoute
 }
 
@@ -358,6 +398,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedAgentesRoute: AuthenticatedAgentesRoute,
   AuthenticatedChatRoute: AuthenticatedChatRoute,
+  AuthenticatedClientsRoute: AuthenticatedClientsRoute,
   AuthenticatedComercialRoute: AuthenticatedComercialRoute,
   AuthenticatedConfiguracoesRoute: AuthenticatedConfiguracoesRoute,
   AuthenticatedContatosRoute: AuthenticatedContatosRoute,
@@ -366,6 +407,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedEquipeRoute: AuthenticatedEquipeRoute,
   AuthenticatedLegalCasesRoute: AuthenticatedLegalCasesRoute,
+  AuthenticatedPlansRoute: AuthenticatedPlansRoute,
   AuthenticatedTelefoniaRoute: AuthenticatedTelefoniaRoute,
 }
 

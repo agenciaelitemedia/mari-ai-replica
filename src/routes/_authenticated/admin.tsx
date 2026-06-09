@@ -8,17 +8,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Shield, User, Globe, Layers, Plus, Package } from 'lucide-react';
-
+import { Loader2, Shield, Layers, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import type { AppRole, Module } from '@/types/permissions';
 import { ModulesList } from '@/components/admin/modulos/ModulesList';
 import { ModuleDialog } from '@/components/admin/modulos/ModuleDialog';
 import { useModulesAdmin, type ModuleFormData } from '@/hooks/useModulesAdmin';
-import { PlansList } from '@/components/admin/planos/PlansList';
-import { PlanDialog } from '@/components/admin/planos/PlanDialog';
-import { usePlansAdmin, type PlanFormData } from '@/hooks/usePlansAdmin';
-import { ClientsManagement } from '@/components/admin/clientes/ClientsManagement';
 
 export const Route = createFileRoute('/_authenticated/admin')({
   component: AdminPage,
@@ -27,14 +22,14 @@ export const Route = createFileRoute('/_authenticated/admin')({
 function AdminPage() {
   const { isSuperAdmin } = useAuth();
   const search = useRouterState({ select: (s) => s.location.search });
-  const [activeTab, setActiveTab] = useState<'permissions' | 'modules' | 'plans' | 'clients'>(
-    (search as any)?.tab || 'permissions'
+  const [activeTab, setActiveTab] = useState<'permissions' | 'modules'>(
+    (search as any)?.tab === 'modules' ? 'modules' : 'permissions'
   );
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const tab = params.get('tab');
-    if (tab && ['permissions', 'modules', 'plans', 'clients'].includes(tab)) {
+    if (tab && ['permissions', 'modules'].includes(tab)) {
       setActiveTab(tab as any);
     }
   }, [search]);
@@ -51,26 +46,16 @@ function AdminPage() {
       </header>
 
       <Tabs value={activeTab} onValueChange={(v: any) => setActiveTab(v)} className="w-full">
-        <TabsList className={`grid w-full ${isSuperAdmin ? 'max-w-2xl grid-cols-4' : 'max-w-md grid-cols-1'} bg-muted/50 p-1.5 h-14 rounded-2xl mb-8`}>
+        <TabsList className={`grid w-full ${isSuperAdmin ? 'max-w-md grid-cols-2' : 'max-w-sm grid-cols-1'} bg-muted/50 p-1.5 h-14 rounded-2xl mb-8`}>
           <TabsTrigger value="permissions" className="flex items-center gap-2 rounded-xl data-[state=active]:shadow-md font-bold text-sm">
             <Shield className="h-4 w-4" />
             Permissões
           </TabsTrigger>
           {isSuperAdmin && (
-            <>
-              <TabsTrigger value="modules" className="flex items-center gap-2 rounded-xl data-[state=active]:shadow-md font-bold text-sm">
-                <Layers className="h-4 w-4" />
-                Módulos
-              </TabsTrigger>
-              <TabsTrigger value="plans" className="flex items-center gap-2 rounded-xl data-[state=active]:shadow-md font-bold text-sm">
-                <Package className="h-4 w-4" />
-                Planos
-              </TabsTrigger>
-              <TabsTrigger value="clients" className="flex items-center gap-2 rounded-xl data-[state=active]:shadow-md font-bold text-sm">
-                <User className="h-4 w-4" />
-                Clientes
-              </TabsTrigger>
-            </>
+            <TabsTrigger value="modules" className="flex items-center gap-2 rounded-xl data-[state=active]:shadow-md font-bold text-sm">
+              <Layers className="h-4 w-4" />
+              Módulos
+            </TabsTrigger>
           )}
         </TabsList>
 
@@ -79,19 +64,9 @@ function AdminPage() {
         </TabsContent>
 
         {isSuperAdmin && (
-          <>
-            <TabsContent value="modules" className="mt-6 space-y-6">
-              <ModulesManagement />
-            </TabsContent>
-
-            <TabsContent value="plans" className="mt-6 space-y-6">
-              <PlansManagement />
-            </TabsContent>
-
-            <TabsContent value="clients" className="mt-6 space-y-6">
-              <ClientsManagement />
-            </TabsContent>
-          </>
+          <TabsContent value="modules" className="mt-6 space-y-6">
+            <ModulesManagement />
+          </TabsContent>
         )}
       </Tabs>
     </div>
@@ -326,54 +301,3 @@ function ModulesManagement() {
     </>
   );
 }
-
-function PlansManagement() {
-  const {
-    plans,
-    isLoading,
-    selectedPlan,
-    isDialogOpen,
-    openCreateDialog,
-    openEditDialog,
-    closeDialog,
-    createPlan,
-    updatePlan,
-    deletePlan,
-    isCreating,
-    isUpdating,
-    isDeleting,
-  } = usePlansAdmin();
-
-  const handleSave = (data: PlanFormData) => {
-    if (selectedPlan) {
-      updatePlan({ planId: selectedPlan.id, planData: data });
-    } else {
-      createPlan(data);
-    }
-  };
-
-  return (
-    <>
-      <Card className="border-border/40 shadow-xl shadow-primary/5 bg-card/60 backdrop-blur-xl rounded-3xl overflow-hidden">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 p-8 border-b border-border/10 bg-linear-to-br from-primary/5 to-transparent">
-          <div>
-            <CardTitle className="text-2xl font-bold tracking-tight">Gestão de Planos</CardTitle>
-            <CardDescription className="text-muted-foreground font-medium">Defina pacotes de módulos para seus clientes.</CardDescription>
-          </div>
-          <Button onClick={openCreateDialog} className="rounded-xl font-extrabold px-6 bg-linear-to-r from-primary to-primary/80 hover:scale-105 transition-all shadow-lg shadow-primary/20">
-            <Plus className="mr-2 h-5 w-5" /> Novo Plano
-          </Button>
-        </CardHeader>
-        <CardContent className="p-8">
-          {isLoading ? (
-            <div className="flex justify-center items-center h-64"><Loader2 className="animate-spin text-primary h-12 w-12" /></div>
-          ) : (
-            <PlansList plans={plans} onEdit={openEditDialog} onDelete={deletePlan} isDeleting={isDeleting} />
-          )}
-        </CardContent>
-      </Card>
-      <PlanDialog open={isDialogOpen} onClose={closeDialog} plan={selectedPlan} onSave={handleSave} isLoading={isCreating || isUpdating} />
-    </>
-  );
-}
-
