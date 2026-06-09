@@ -95,6 +95,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
+      {
+        rel: "preconnect",
+        href: "https://project--c82ef527-c85b-48d5-b3f7-7ded8791f126.supabase.co",
+      },
     ],
   }),
   shellComponent: RootShell,

@@ -93,6 +93,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return [];
     },
     enabled: !!user && !!profile,
+    staleTime: 1000 * 60 * 10, // 10 minutes
+    gcTime: 1000 * 60 * 60, // 1 hour
   });
 
   const refreshProfile = useCallback(async () => {
