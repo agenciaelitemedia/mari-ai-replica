@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import type { UserPermission } from '@/types/permissions';
 import { useQuery } from '@tanstack/react-query';
+import { useMemo } from 'react';
 
 interface AuthContextType {
   user: User | null;
@@ -27,7 +28,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { data: permissions = [], refetch: refetchPermissions } = useQuery({
     queryKey: ['user-permissions', user?.id, profile?.use_custom_permissions],
     queryFn: async () => {
-      if (!user) return [];
+      if (!user || isSuperAdmin) return [];
 
       // 1. Get user roles
       const { data: roles } = await supabase
@@ -145,11 +146,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await supabase.auth.signOut();
   };
 
-  const isAdmin = userRoles.includes('admin') || userRoles.includes('superadmin');
-  const isSuperAdmin = userRoles.includes('superadmin');
+  const isAdmin = useMemo(() => userRoles.includes('admin') || userRoles.includes('superadmin'), [userRoles]);
+  const isSuperAdmin = useMemo(() => userRoles.includes('superadmin'), [userRoles]);
 
   const hasPermission = useCallback((moduleCode: string, action: 'view' | 'create' | 'edit' | 'delete' = 'view') => {
     if (isSuperAdmin) return true;
+    
     const perm = permissions.find(p => p.module_code === moduleCode);
     if (!perm) return false;
     
