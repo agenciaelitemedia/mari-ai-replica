@@ -309,7 +309,7 @@ export function PlanDialog({ open, onClose, plan, onSave, isLoading }: PlanDialo
                     </span>
                   </div>
                   
-                  <ScrollArea className="h-[820px] w-full pr-4">
+                  <ScrollArea className="h-[560px] w-full pr-4">
                   
                   {isLoadingModules ? (
                     <div className="flex justify-center p-8"><Loader2 className="animate-spin text-primary" /></div>
