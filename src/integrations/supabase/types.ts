@@ -551,8 +551,10 @@ export type Database = {
           board_id: string
           cod_agent: string
           contact_email: string | null
+          contact_id: string | null
           contact_name: string | null
           contact_phone: string | null
+          conversation_id: string | null
           created_at: string
           created_by: string | null
           currency: string | null
@@ -575,8 +577,10 @@ export type Database = {
           board_id: string
           cod_agent: string
           contact_email?: string | null
+          contact_id?: string | null
           contact_name?: string | null
           contact_phone?: string | null
+          conversation_id?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string | null
@@ -599,8 +603,10 @@ export type Database = {
           board_id?: string
           cod_agent?: string
           contact_email?: string | null
+          contact_id?: string | null
           contact_name?: string | null
           contact_phone?: string | null
+          conversation_id?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string | null
@@ -624,6 +630,20 @@ export type Database = {
             columns: ["board_id"]
             isOneToOne: false
             referencedRelation: "crm_boards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_deals_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "chat_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_deals_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "chat_conversations"
             referencedColumns: ["id"]
           },
           {

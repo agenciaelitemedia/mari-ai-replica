@@ -4,12 +4,30 @@ import { useServerFn } from '@tanstack/react-start'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
 import { listConversations, listMessages, sendMessage } from '@/lib/chat.functions'
+import { listBoards, getBoardData, linkConversationToDeal } from '@/lib/crm.functions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
-import { Send, MessageSquare } from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Send, MessageSquare, Briefcase } from 'lucide-react'
+import { toast } from 'sonner'
 
 export const Route = createFileRoute('/_authenticated/chat')({
   component: ChatPage,
@@ -123,11 +141,14 @@ function ChatPage() {
         )}
         {selected && (
           <>
-            <div className="p-4 border-b">
-              <p className="font-semibold">{selected.contact?.name}</p>
-              <p className="text-xs text-muted-foreground">
-                {selected.contact?.phone} • {selected.protocol}
-              </p>
+            <div className="p-4 border-b flex items-center justify-between gap-2">
+              <div>
+                <p className="font-semibold">{selected.contact?.name}</p>
+                <p className="text-xs text-muted-foreground">
+                  {selected.contact?.phone} • {selected.protocol}
+                </p>
+              </div>
+              <LinkToDealButton conversationId={selected.id} />
             </div>
             <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-2">
               {msgsQ.data?.messages?.map((m: any) => (
@@ -174,5 +195,100 @@ function ChatPage() {
         )}
       </Card>
     </div>
+  )
+}
+
+function LinkToDealButton({ conversationId }: { conversationId: string }) {
+  const qc = useQueryClient()
+  const fetchBoards = useServerFn(listBoards)
+  const fetchBoard = useServerFn(getBoardData)
+  const linkFn = useServerFn(linkConversationToDeal)
+
+  const [open, setOpen] = useState(false)
+  const [boardId, setBoardId] = useState<string>('')
+  const [pipelineId, setPipelineId] = useState<string>('')
+
+  const boardsQ = useQuery({
+    queryKey: ['crm-boards'],
+    queryFn: () => fetchBoards(),
+    enabled: open,
+  })
+
+  useEffect(() => {
+    if (open && !boardId && boardsQ.data?.boards?.[0]) {
+      setBoardId(boardsQ.data.boards[0].id)
+    }
+  }, [open, boardId, boardsQ.data])
+
+  const boardQ = useQuery({
+    queryKey: ['crm-board', boardId],
+    queryFn: () => fetchBoard({ data: { boardId } }),
+    enabled: !!boardId && open,
+  })
+
+  useEffect(() => {
+    if (boardQ.data?.pipelines?.[0] && !pipelineId) {
+      setPipelineId(boardQ.data.pipelines[0].id)
+    }
+  }, [boardQ.data, pipelineId])
+
+  const linkM = useMutation({
+    mutationFn: () => linkFn({ data: { conversationId, boardId, pipelineId } }),
+    onSuccess: (r: any) => {
+      toast.success(r?.reused ? 'Conversa já vinculada a um negócio' : 'Negócio criado e vinculado')
+      setOpen(false)
+      qc.invalidateQueries({ queryKey: ['crm-board', boardId] })
+    },
+    onError: (e: any) => toast.error(e?.message ?? 'Erro ao vincular'),
+  })
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm" variant="outline">
+          <Briefcase className="size-4 mr-1" /> Vincular a Deal
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Vincular conversa a um negócio</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="space-y-1">
+            <Label>Quadro</Label>
+            <Select value={boardId} onValueChange={(v) => { setBoardId(v); setPipelineId('') }}>
+              <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+              <SelectContent>
+                {boardsQ.data?.boards?.map((b: any) => (
+                  <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {boardsQ.data && boardsQ.data.boards.length === 0 && (
+              <p className="text-xs text-muted-foreground">Crie um quadro em CRM primeiro.</p>
+            )}
+          </div>
+          <div className="space-y-1">
+            <Label>Etapa</Label>
+            <Select value={pipelineId} onValueChange={setPipelineId} disabled={!boardId}>
+              <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+              <SelectContent>
+                {boardQ.data?.pipelines?.map((p: any) => (
+                  <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button
+            disabled={!boardId || !pipelineId || linkM.isPending}
+            onClick={() => linkM.mutate()}
+          >
+            Vincular
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }

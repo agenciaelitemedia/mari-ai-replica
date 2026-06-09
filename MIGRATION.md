@@ -78,3 +78,11 @@ As tabelas de chat/CRM herdam as policies permissivas `USING (true) TO authentic
 8. **Fase 9** — Admin + push + finalizações
 
 Diga qual módulo priorizar e a Fase 2 começa.
+
+## Fase 3 — CRM funcional concluída ✅
+
+- `crm_deals` ganhou colunas `conversation_id` (FK → `chat_conversations`) e `contact_id` (FK → `chat_contacts`) com índices.
+- Realtime habilitado em `crm_deals`, `crm_pipelines`, `crm_boards`.
+- Server functions (`src/lib/crm.functions.ts`): `listBoards`, `createBoard` (cria 6 etapas padrão: Novo, Qualificação, Proposta, Negociação, Ganho, Perdido), `getBoardData`, `createDeal`, `moveDeal` (com histórico em `crm_deal_history`), `linkConversationToDeal` (idempotente — reusa deal se já vinculado).
+- UI `/crm`: kanban com drag-and-drop (`@hello-pangea/dnd`), troca de quadros, criação inline de negócios por coluna, soma de valores por etapa, realtime via `postgres_changes`.
+- UI `/chat`: botão "Vincular a Deal" no header da conversa selecionada — escolhe quadro + etapa e cria/reutiliza o negócio vinculado.
