@@ -67,6 +67,8 @@ function PermissionsMatrixPage() {
   // Mutation to update role permissions
   const updateRolePermMutation = useMutation({
     mutationFn: async ({ moduleId, field, value }: { moduleId: string; field: string; value: boolean }) => {
+      if (selectedRole === 'all') return;
+
       // First check if it exists
       const { data: existing } = await supabase
         .from('role_default_permissions')
@@ -78,7 +80,7 @@ function PermissionsMatrixPage() {
       if (existing) {
         const { error } = await supabase
           .from('role_default_permissions')
-          .update({ [field]: value })
+          .update({ [field]: value } as any)
           .eq('id', existing.id);
         if (error) throw error;
       } else {
@@ -88,7 +90,7 @@ function PermissionsMatrixPage() {
             role: selectedRole,
             module_id: moduleId,
             [field]: value,
-          });
+          } as any);
         if (error) throw error;
       }
     },
@@ -170,11 +172,12 @@ function PermissionsMatrixPage() {
                     </thead>
                     <tbody className="divide-y">
                       {modules.map((mod) => {
-                        const perm = rolePermissions.find(p => p.module_id === mod.id) || {
-                          can_view: false,
-                          can_create: false,
-                          can_edit: false,
-                          can_delete: false,
+                        const permFound = rolePermissions.find(p => p.module_id === mod.id);
+                        const perm = {
+                          can_view: !!permFound?.can_view,
+                          can_create: !!permFound?.can_create,
+                          can_edit: !!permFound?.can_edit,
+                          can_delete: !!permFound?.can_delete,
                         };
                         
                         return (
