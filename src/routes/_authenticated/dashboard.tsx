@@ -19,52 +19,45 @@ const QUICK = [
 
 function DashboardPage() {
   return (
-    <div className="p-6 md:p-12 space-y-12 max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <header className="relative">
-        <div className="absolute -top-12 -left-12 w-64 h-64 bg-primary/5 rounded-full blur-3xl -z-10" />
-        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-foreground sm:text-6xl mb-4">
-          Bem-vindo à <span className="text-gradient">MarI.A</span>
-        </h1>
-        <p className="text-xl text-muted-foreground max-w-2xl leading-relaxed">
-          Sua central inteligente de atendimento e gestão. Uma experiência premium projetada para máxima produtividade.
-        </p>
+    <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-2 duration-500">
+      <header className="relative flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground mb-1">
+            Dashboard
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Bem-vindo de volta! Aqui está o que está acontecendo hoje.
+          </p>
+        </div>
       </header>
 
       <section className="space-y-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold tracking-tight">Módulos principais</h2>
-          <div className="h-px flex-1 bg-border/50 mx-6 hidden md:block" />
+          <h2 className="text-lg font-bold tracking-tight">Módulos</h2>
         </div>
         
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {QUICK.map((q, idx) => {
+          {QUICK.map((q) => {
             const Icon = q.icon;
             return (
               <Link key={q.to} to={q.to} className="group">
-                <Card className="relative overflow-hidden border-border/40 hover:border-primary/50 transition-all duration-300 h-full hover:shadow-2xl hover:shadow-primary/10 group-hover:-translate-y-2">
-                  <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-                    <Icon className="h-24 w-24 -mr-8 -mt-8 rotate-12" />
-                  </div>
+                <Card className="relative overflow-hidden border-border/50 hover:border-primary/30 transition-all duration-200 h-full hover:shadow-lg">
                   <CardHeader className="relative pb-2">
-                    <div className="flex items-center gap-4">
-                      <div className="h-12 w-12 rounded-2xl bg-primary/5 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300 shadow-inner">
-                        <Icon className="h-6 w-6" />
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
+                        <Icon className="h-5 w-5" />
                       </div>
-                      <CardTitle className="text-xl font-bold tracking-tight">{q.label}</CardTitle>
+                      <CardTitle className="text-base font-bold tracking-tight">{q.label}</CardTitle>
                     </div>
                   </CardHeader>
                   <CardContent className="relative">
-                    <CardDescription className="text-base leading-relaxed text-muted-foreground/80">
+                    <CardDescription className="text-sm leading-relaxed text-muted-foreground">
                       {q.desc}
                     </CardDescription>
                   </CardContent>
-                  <div className="px-6 pb-6 mt-auto">
-                    <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-primary/20 group-hover:bg-primary transition-all duration-500 rounded-full" 
-                        style={{ width: '0%', transitionDelay: `${idx * 100}ms` }}
-                        ref={(el) => { if(el) setTimeout(() => el.style.width = '30%', 100); }}
-                      />
+                  <div className="px-6 pb-6 mt-auto opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="h-1 w-full bg-primary/10 rounded-full overflow-hidden">
+                      <div className="h-full bg-primary rounded-full w-full animate-in slide-in-from-left-full duration-500" />
                     </div>
                   </div>
                 </Card>
@@ -74,26 +67,25 @@ function DashboardPage() {
         </div>
       </section>
 
-      <section className="bg-primary/5 border border-primary/10 rounded-3xl p-8 md:p-12 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl -mr-48 -mt-48 opacity-50" />
+      <section className="bg-card border border-border/50 rounded-xl p-6 md:p-8">
         <div className="relative z-10 grid md:grid-cols-2 gap-8 items-center">
           <div>
-            <h3 className="text-2xl font-bold mb-4">Próximos Passos</h3>
-            <p className="text-muted-foreground mb-6 text-lg">
+            <h3 className="text-lg font-bold mb-2">Próximos Passos</h3>
+            <p className="text-muted-foreground mb-6 text-sm">
               Estamos portando todas as funcionalidades do AppJulia para a nova infraestrutura. Fique atento às atualizações automáticas do sistema.
             </p>
-            <Button className="rounded-2xl px-8 h-12 text-base font-semibold shadow-lg shadow-primary/20">
+            <Button className="rounded-lg px-6 h-10 text-sm font-semibold">
               Ver roteiro de atualizações
             </Button>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-card/50 backdrop-blur-sm p-6 rounded-2xl border border-border/40">
-              <p className="text-3xl font-bold text-primary mb-1">98%</p>
-              <p className="text-sm text-muted-foreground font-medium uppercase tracking-wider">Uptime</p>
+            <div className="bg-muted/30 p-6 rounded-lg border border-border/50">
+              <p className="text-2xl font-bold text-primary mb-1">98%</p>
+              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Uptime</p>
             </div>
-            <div className="bg-card/50 backdrop-blur-sm p-6 rounded-2xl border border-border/40">
-              <p className="text-3xl font-bold text-primary mb-1">0.2s</p>
-              <p className="text-sm text-muted-foreground font-medium uppercase tracking-wider">Latência</p>
+            <div className="bg-muted/30 p-6 rounded-lg border border-border/50">
+              <p className="text-2xl font-bold text-primary mb-1">0.2s</p>
+              <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Latência</p>
             </div>
           </div>
         </div>
