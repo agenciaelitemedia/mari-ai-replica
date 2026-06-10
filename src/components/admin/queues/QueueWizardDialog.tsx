@@ -53,11 +53,10 @@ export function QueueWizardDialog({ open, onOpenChange }: Props) {
 
   const evoInstance = useMemo(() => {
     if (selectedType !== 'uazapi') return ''
-    const uid = user?.id || '0'
     const rand = (typeof crypto !== 'undefined' && 'randomUUID' in crypto)
       ? crypto.randomUUID().split('-')[0]
       : Math.random().toString(36).slice(2, 10)
-    return `QUEUE_${uid}_${rand}`
+    return `MarI.A.-${rand}`
   }, [selectedType, user?.id, open])
 
   const filteredProviders = allProviders.filter(
