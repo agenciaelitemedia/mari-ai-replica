@@ -366,7 +366,7 @@ export const deleteQueueFull = createServerFn({ method: 'POST' })
 
     const { data: q } = await supabaseAdmin
       .from('queues')
-      .select('client_id, channel_type, evo_instance, evo_url, evo_apikey')
+      .select('client_id, channel_type, evo_instance, evo_url, evo_apikey, provider_id')
       .eq('id', data.queue_id)
       .maybeSingle()
     if (!q) throw new Error('Fila não encontrada')
