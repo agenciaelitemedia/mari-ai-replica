@@ -4,8 +4,16 @@ import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware'
 import { providerSchema, generateRandomKey, type ProviderType } from './providers.types'
 
 async function getUserClientId(supabase: any, userId: string): Promise<string | null> {
-  const { data } = await supabase.from('profiles').select('client_id').eq('id', userId).maybeSingle()
-  return data?.client_id ?? null
+  const { data: profile } = await supabase.from('profiles').select('client_id, email').eq('id', userId).maybeSingle()
+  if (profile?.client_id) return profile.client_id
+
+  // Fallback: search client by email if profile client_id is missing
+  if (profile?.email) {
+    const { data: client } = await supabase.from('clients').select('id').eq('email', profile.email).maybeSingle()
+    if (client) return client.id
+  }
+
+  return null
 }
 
 async function isSuperAdmin(supabase: any, userId: string) {
