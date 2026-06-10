@@ -399,6 +399,21 @@ export const deleteQueueFull = createServerFn({ method: 'POST' })
       .update({ is_deleted: true, deleted_at: new Date().toISOString(), is_active: false })
       .eq('id', data.queue_id)
     if (error) throw new Error(error.message)
+
+    // If UaZapi, try deleting the instance as well
+    if (q.channel_type === 'uazapi' && q.evo_instance && q.evo_url && q.evo_apikey) {
+      try {
+        console.log(`[deleteQueueFull] Deleting UaZapi instance: ${q.evo_instance}`)
+        const config = { baseUrl: q.evo_url, adminToken: q.evo_apikey }
+        const deleteResult = await uazapi.deleteInstance(config, q.evo_instance)
+        console.log(`[deleteQueueFull] UaZapi delete result:`, JSON.stringify(deleteResult))
+      } catch (e) {
+        console.error('[deleteQueueFull] Failed to delete UaZapi instance:', e)
+        // We don't throw here to avoid blocking the queue deletion in our system
+        // but it's good to have it logged.
+      }
+    }
+
     return { ok: true }
   })
 
