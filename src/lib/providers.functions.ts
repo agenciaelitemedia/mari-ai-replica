@@ -264,7 +264,8 @@ export const createQueueFull = createServerFn({ method: 'POST' })
         
         // 1. Create Instance
         console.log(`[createQueueFull] Creating UaZapi instance: ${row.evo_instance}`)
-        await uazapi.createInstance(config, row.evo_instance)
+        const createResult = await uazapi.createInstance(config, row.evo_instance)
+        console.log(`[createQueueFull] Create result:`, createResult)
 
         // 2. Set Settings
         await uazapi.setSettings(config, row.evo_instance)
