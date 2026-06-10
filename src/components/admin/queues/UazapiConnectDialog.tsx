@@ -76,8 +76,8 @@ export function UazapiConnectDialog({ open, onOpenChange, queueId, queueName }: 
     return () => clearInterval(interval)
   }, [open, loading, queueId])
 
-  const isConnected = status?.instance?.state === 'open' || status?.status === 'open' || status?.state === 'open'
-  const profile = status?.instance?.profile || status?.profile
+  const isConnected = status?.instance?.state === 'open' || status?.status === 'open' || status?.state === 'open' || status?.response?.instance?.state === 'open'
+  const profile = status?.instance?.profile || status?.profile || status?.response?.instance?.profile
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
