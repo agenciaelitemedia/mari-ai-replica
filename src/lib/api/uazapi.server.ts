@@ -66,13 +66,16 @@ export const uazapi = {
     return res.json()
   },
 
-  async deleteInstance(config: UazApiConfig, instanceToken: string) {
-    const url = `${config.baseUrl.replace(/\/$/, '')}/instance`
+  async deleteInstance(config: UazApiConfig, instanceName: string) {
+    const url = `${config.baseUrl.replace(/\/$/, '')}/instance/delete`
     const res = await fetch(url, {
       method: 'DELETE',
       headers: {
-        'token': instanceToken,
+        'admintoken': config.adminToken,
       },
+      body: JSON.stringify({
+        name: instanceName,
+      }),
     })
     return res.json()
   },
