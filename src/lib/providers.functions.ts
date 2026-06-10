@@ -361,7 +361,11 @@ export const deleteQueueFull = createServerFn({ method: 'POST' })
     const superadmin = await isSuperAdmin(supabase, userId)
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
 
-    const { data: q } = await supabaseAdmin.from('queues').select('client_id').eq('id', data.queue_id).maybeSingle()
+    const { data: q } = await supabaseAdmin
+      .from('queues')
+      .select('client_id, channel_type, evo_instance, evo_url, evo_apikey')
+      .eq('id', data.queue_id)
+      .maybeSingle()
     if (!q) throw new Error('Fila não encontrada')
     if (!superadmin) {
       const cid = await getUserClientId(supabase, userId)
