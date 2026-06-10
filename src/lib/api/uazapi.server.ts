@@ -101,4 +101,49 @@ export const uazapi = {
     })
     return res.json()
   }
+  async getConnectionState(config: UazApiConfig, instanceName: string) {
+    const url = `${config.baseUrl.replace(/\/$/, '')}/instance/connectionState/${instanceName}`
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'admintoken': config.adminToken,
+      },
+    })
+    return res.json()
+  },
+
+  async getQrCode(config: UazApiConfig, instanceName: string) {
+    const url = `${config.baseUrl.replace(/\/$/, '')}/instance/connect/${instanceName}`
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'admintoken': config.adminToken,
+      },
+    })
+    return res.json()
+  },
+
+  async sendText(config: UazApiConfig, instanceName: string, number: string, text: string) {
+    const url = `${config.baseUrl.replace(/\/$/, '')}/message/sendText/${instanceName}`
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'admintoken': config.adminToken,
+      },
+      body: JSON.stringify({
+        number,
+        options: {
+          delay: 1200,
+          presence: "composing",
+          linkPreview: false,
+        },
+        textMessage: {
+          text,
+        },
+      }),
+    })
+    return res.json()
+  }
 }
+
