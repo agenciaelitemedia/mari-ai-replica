@@ -1,17 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useMemo, useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Plus, Copy, Loader2 } from 'lucide-react'
+import { Copy } from 'lucide-react'
 import { toast } from 'sonner'
-import { useAuth } from '@/contexts/AuthContext'
 import { useProvidersAdmin } from '@/hooks/useProvidersAdmin'
-import { useQueuesAdmin } from '@/hooks/useQueuesAdmin'
 import { ProvidersPanel } from '@/components/admin/providers/ProvidersPanel'
-import { QueuesList } from '@/components/admin/queues/QueuesList'
-import { QueueDialog } from '@/components/admin/queues/QueueDialog'
-import { confirmDelete } from '@/lib/swal'
+import { QueuesPanel } from '@/components/admin/queues/QueuesPanel'
 
 export const Route = createFileRoute('/_authenticated/configuracoes')({
   head: () => ({ meta: [{ title: 'Configurações — MarI.A.' }] }),
