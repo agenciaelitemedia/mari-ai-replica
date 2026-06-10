@@ -80,7 +80,6 @@ export const uazapi = {
   },
 
   async deleteInstance(config: UazApiConfig, instanceName: string) {
-
     const url = `${config.baseUrl.replace(/\/$/, '')}/instance/delete/${instanceName}`
     const res = await fetch(url, {
       method: 'DELETE',
@@ -100,7 +99,8 @@ export const uazapi = {
       },
     })
     return res.json()
-  }
+  },
+
   async getConnectionState(config: UazApiConfig, instanceName: string) {
     const url = `${config.baseUrl.replace(/\/$/, '')}/instance/connectionState/${instanceName}`
     const res = await fetch(url, {
@@ -146,6 +146,3 @@ export const uazapi = {
     return res.json()
   }
 }
-
-}
-
