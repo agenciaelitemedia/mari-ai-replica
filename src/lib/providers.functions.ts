@@ -119,7 +119,7 @@ export const testProvider = createServerFn({ method: 'POST' })
     try {
       if (p.provider_type === 'uazapi') {
         const config = { baseUrl: p.evo_url ?? '', adminToken: p.evo_apikey ?? '' }
-        const data = await uazapi.fetchInstances(config)
+        const data = await uazapi.listAllInstances(config)
         // Check if data is an array or has the expected shape
         const ok = Array.isArray(data) || !!data
         return { ok, status: 200, body: JSON.stringify(data) }
@@ -267,16 +267,20 @@ export const createQueueFull = createServerFn({ method: 'POST' })
         const createResult = await uazapi.createInstance(config, row.evo_instance)
         console.log(`[createQueueFull] Create result for ${row.evo_instance}:`, JSON.stringify(createResult))
         
-        // Verifica se houve erro na resposta da API
-        // UaZapi retorna o token da instância se criado com sucesso
+        // UaZapi returns instance token on success
         const instanceToken = createResult?.token || createResult?.instanceToken || createResult?.response?.token
         
         if (!createResult || createResult.error || !instanceToken) {
-           // Se falhou a criação na API externa, removemos o registro da fila recém criado no banco
            await supabaseAdmin.from('queues').delete().eq('id', row.id)
-           const errorMsg = createResult?.message || createResult?.error || 'Erro desconhecido na API UaZapi (Token não retornado)'
+           const errorMsg = createResult?.message || createResult?.error || 'Erro na API UaZapi (Token não retornado)'
            throw new Error(`Falha ao criar instância na UaZapi: ${errorMsg}`)
         }
+
+        // Update queue with the real instance token (replacing the admin token)
+        await supabaseAdmin
+          .from('queues')
+          .update({ evo_apikey: instanceToken })
+          .eq('id', row.id);
 
         // 2. Set Webhook
         const request = getRequest()
@@ -286,9 +290,8 @@ export const createQueueFull = createServerFn({ method: 'POST' })
         console.log(`[createQueueFull] Setting UaZapi webhook: ${webhookUrl}`)
         await uazapi.setWebhook(config, instanceToken, webhookUrl)
       } catch (e: any) {
-        // Se houver qualquer erro no processo de configuração externa, removemos a fila para garantir o "tudo ou nada"
         await supabaseAdmin.from('queues').delete().eq('id', row.id)
-        console.error('[createQueueFull] Failed to fully configure uazapi instance, rolling back queue creation:', e)
+        console.error('[createQueueFull] Failed to configure uazapi instance:', e)
         throw new Error(e?.message || 'Erro ao configurar instância externa')
       }
     }
@@ -363,7 +366,7 @@ export const deleteQueueFull = createServerFn({ method: 'POST' })
 
     const { data: q } = await supabaseAdmin
       .from('queues')
-      .select('client_id, channel_type, evo_instance, evo_url, evo_apikey')
+      .select('client_id, channel_type, evo_instance, evo_url, evo_apikey, provider_id')
       .eq('id', data.queue_id)
       .maybeSingle()
     if (!q) throw new Error('Fila não encontrada')
@@ -404,13 +407,44 @@ export const deleteQueueFull = createServerFn({ method: 'POST' })
     if (q.channel_type === 'uazapi' && q.evo_instance && q.evo_url && q.evo_apikey) {
       try {
         console.log(`[deleteQueueFull] Deleting UaZapi instance: ${q.evo_instance}`)
-        const config = { baseUrl: q.evo_url, adminToken: q.evo_apikey }
-        const deleteResult = await uazapi.deleteInstance(config, q.evo_instance)
-        console.log(`[deleteQueueFull] UaZapi delete result:`, JSON.stringify(deleteResult))
+        
+        let adminToken = q.evo_apikey // Default to stored token (if it's still the admin one)
+        
+        // Fetch the real admin token from the provider
+        if (q.provider_id) {
+          const { data: prov } = await supabaseAdmin
+            .from('queue_providers')
+            .select('evo_apikey')
+            .eq('id', q.provider_id)
+            .maybeSingle()
+          if (prov?.evo_apikey) adminToken = prov.evo_apikey
+        }
+
+        const config = { baseUrl: q.evo_url, adminToken }
+        
+        // Try delete with current token (should be the instance token)
+        let deleteResult = await uazapi.deleteInstance(config, q.evo_apikey)
+        console.log(`[deleteQueueFull] UaZapi delete attempt 1 result:`, JSON.stringify(deleteResult))
+
+        // If failed (e.g. 401), try finding the real token by listing all instances
+        if (deleteResult.code === 401 || !deleteResult.success) {
+          console.log(`[deleteQueueFull] Delete failed, searching for instance token by name...`)
+          const allInstances = await uazapi.listAllInstances(config)
+          const instancesArr = Array.isArray(allInstances) ? allInstances : (allInstances?.instances ?? [])
+          const match = instancesArr.find((i: any) => 
+            i.name === q.evo_instance || i.instanceName === q.evo_instance || i.instance === q.evo_instance
+          )
+          
+          if (match?.token) {
+            console.log(`[deleteQueueFull] Found real token for ${q.evo_instance}, retrying delete...`)
+            deleteResult = await uazapi.deleteInstance(config, match.token)
+            console.log(`[deleteQueueFull] UaZapi delete attempt 2 result:`, JSON.stringify(deleteResult))
+          } else if (!match) {
+             console.log(`[deleteQueueFull] Instance not found on server, assuming already deleted.`)
+          }
+        }
       } catch (e) {
         console.error('[deleteQueueFull] Failed to delete UaZapi instance:', e)
-        // We don't throw here to avoid blocking the queue deletion in our system
-        // but it's good to have it logged.
       }
     }
 

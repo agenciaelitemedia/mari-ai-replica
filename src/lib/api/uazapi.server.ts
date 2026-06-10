@@ -67,19 +67,20 @@ export const uazapi = {
     return res.json()
   },
 
-  async deleteInstance(config: UazApiConfig, instanceName: string) {
-    const url = `${config.baseUrl.replace(/\/$/, '')}/instance/delete/${instanceName}`
+  async deleteInstance(config: UazApiConfig, instanceToken: string) {
+    const url = `${config.baseUrl.replace(/\/$/, '')}/instance`
     const res = await fetch(url, {
       method: 'DELETE',
       headers: {
         'admintoken': config.adminToken,
+        'token': instanceToken,
       },
     })
     return res.json()
   },
 
-  async fetchInstances(config: UazApiConfig) {
-    const url = `${config.baseUrl.replace(/\/$/, '')}/instance/fetchInstances`
+  async listAllInstances(config: UazApiConfig) {
+    const url = `${config.baseUrl.replace(/\/$/, '')}/instance/all`
     const res = await fetch(url, {
       method: 'GET',
       headers: {
@@ -88,6 +89,7 @@ export const uazapi = {
     })
     return res.json()
   },
+
 
   async getConnectionState(config: UazApiConfig, instanceToken: string) {
     const url = `${config.baseUrl.replace(/\/$/, '')}/instance/status`
