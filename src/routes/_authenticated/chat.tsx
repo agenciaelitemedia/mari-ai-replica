@@ -26,7 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Send, MessageSquare, Briefcase } from 'lucide-react'
+import { Send, MessageSquare, Briefcase, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 
 export const Route = createFileRoute('/_authenticated/chat')({
@@ -56,7 +56,11 @@ function ChatPage() {
   })
 
   const sendM = useMutation({
-    mutationFn: (text: string) => sendFn({ data: { conversationId: selectedId!, text } }),
+    mutationFn: (text: string) => {
+      const msg = { conversationId: selectedId!, text };
+      console.log('Sending message:', msg);
+      return sendFn({ data: msg });
+    },
     onSuccess: () => {
       setDraft('')
       qc.invalidateQueries({ queryKey: ['chat-messages', selectedId] })
@@ -150,7 +154,17 @@ function ChatPage() {
               </div>
               <LinkToDealButton conversationId={selected.id} />
             </div>
-            <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-2">
+            <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3 bg-muted/10">
+              {msgsQ.isLoading && (
+                <div className="flex justify-center py-8">
+                  <Loader2 className="animate-spin text-muted-foreground" />
+                </div>
+              )}
+              {msgsQ.data?.messages?.length === 0 && !msgsQ.isLoading && (
+                <div className="text-center py-20 text-muted-foreground text-sm italic">
+                  Nenhuma mensagem nesta conversa.
+                </div>
+              )}
               {msgsQ.data?.messages?.map((m: any) => (
                 <div
                   key={m.id}

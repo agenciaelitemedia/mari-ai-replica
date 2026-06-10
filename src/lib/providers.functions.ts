@@ -121,7 +121,8 @@ export const testProvider = createServerFn({ method: 'POST' })
         const config = { baseUrl: p.evo_url ?? '', adminToken: p.evo_apikey ?? '' }
         const data = await uazapi.listAllInstances(config)
         // Check if data is an array or has the expected shape
-        const ok = Array.isArray(data) || !!data
+        const instancesArr = Array.isArray(data) ? data : (data?.instances ?? (data?.response?.instances || []))
+        const ok = Array.isArray(instancesArr) || !!data
         return { ok, status: 200, body: JSON.stringify(data) }
       }
 
