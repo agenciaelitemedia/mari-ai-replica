@@ -41,7 +41,10 @@ function AuthPage() {
       return;
     }
     toast.success("Bem-vindo de volta!");
-    navigate({ to: "/dashboard", replace: true });
+    const search = window.location.search;
+    const params = new URLSearchParams(search);
+    const redirectTo = params.get('redirect') || '/dashboard';
+    navigate({ to: redirectTo as any, replace: true });
   }
 
   async function handleSignUp(e: React.FormEvent) {
