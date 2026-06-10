@@ -234,6 +234,27 @@ export const createQueueFull = createServerFn({ method: 'POST' })
       }
     }
 
+    // If UaZapi, try creating instance automatically
+    if (data.channel_type === 'uazapi' && data.evo_instance && snapshot.evo_url && snapshot.evo_apikey) {
+      try {
+        const baseUrl = snapshot.evo_url.replace(/\/$/, '')
+        await fetch(`${baseUrl}/instance/create`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'admintoken': snapshot.evo_apikey,
+          },
+          body: JSON.stringify({
+            instanceName: data.evo_instance,
+            qrcode: true,
+          }),
+        })
+        // We don't block if create fails (e.g. already exists), but we log it
+      } catch (e) {
+        console.error('[createQueueFull] Failed to auto-create uazapi instance:', e)
+      }
+    }
+
     const payload: any = {
       client_id: clientId,
       provider_id: data.provider_id ?? null,

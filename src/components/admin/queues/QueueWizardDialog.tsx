@@ -56,7 +56,7 @@ export function QueueWizardDialog({ open, onOpenChange }: Props) {
     const rand = (typeof crypto !== 'undefined' && 'randomUUID' in crypto)
       ? crypto.randomUUID().split('-')[0]
       : Math.random().toString(36).slice(2, 10)
-    return `MarI.A.-${rand}`
+    return `QMarIA_${rand}`
   }, [selectedType, user?.id, open])
 
   const filteredProviders = allProviders.filter(
