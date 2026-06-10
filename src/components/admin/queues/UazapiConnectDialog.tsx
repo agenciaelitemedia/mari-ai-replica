@@ -36,10 +36,10 @@ export function UazapiConnectDialog({ open, onOpenChange, queueId, queueName }: 
       setStatus(statRes)
       
       // Look for QR in various possible positions
-      const qrBase64 = qrRes?.base64 || qrRes?.qrcode || qrRes?.response?.qrcode || qrRes?.response?.base64
+      const qrData = qrRes?.base64 || qrRes?.qrcode || qrRes?.response?.qrcode || qrRes?.response?.base64 || qrRes?.instance?.qrcode?.base64 || qrRes?.instance?.qrcode
       
-      if (qrBase64) {
-        setQrCode(qrBase64.startsWith('data:image') ? qrBase64 : `data:image/png;base64,${qrBase64}`)
+      if (qrData) {
+        setQrCode(qrData.startsWith('data:image') ? qrData : `data:image/png;base64,${qrData}`)
       } else {
         setQrCode(null)
       }
@@ -78,8 +78,8 @@ export function UazapiConnectDialog({ open, onOpenChange, queueId, queueName }: 
     return () => clearInterval(interval)
   }, [open, loading, queueId])
 
-  const isConnected = status?.instance?.state === 'open' || status?.status === 'open' || status?.state === 'open' || status?.response?.instance?.state === 'open'
-  const profile = status?.instance?.profile || status?.profile || status?.response?.instance?.profile
+  const isConnected = status?.instance?.state === 'open' || status?.status === 'open' || status?.state === 'open' || status?.response?.instance?.state === 'open' || status?.instance?.connectionStatus === 'open'
+  const profile = status?.instance?.profile || status?.profile || status?.response?.instance?.profile || status?.instance?.owner || status?.response?.instance?.owner
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
