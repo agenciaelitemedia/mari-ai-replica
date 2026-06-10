@@ -4,8 +4,12 @@ export interface UazApiConfig {
 }
 
 export const uazapi = {
+  /**
+   * Create a new instance
+   * POST /instance/init (based on appjulia)
+   */
   async createInstance(config: UazApiConfig, instanceName: string) {
-    const url = `${config.baseUrl.replace(/\/$/, '')}/instance/create`
+    const url = `${config.baseUrl.replace(/\/$/, '')}/instance/init`
     const res = await fetch(url, {
       method: 'POST',
       headers: {
@@ -13,78 +17,61 @@ export const uazapi = {
         'admintoken': config.adminToken,
       },
       body: JSON.stringify({
-        instanceName,
-        token: instanceName,
-        qrcode: true,
+        name: instanceName,
       }),
     })
     return res.json()
   },
 
-  async setWebhook(config: UazApiConfig, instanceName: string, webhookUrl: string) {
-    const url = `${config.baseUrl.replace(/\/$/, '')}/webhook/set/${instanceName}`
+  /**
+   * Set webhook for an instance
+   * POST /webhook
+   * Requires 'token' header (instance token)
+   */
+  async setWebhook(config: UazApiConfig, instanceToken: string, webhookUrl: string) {
+    const url = `${config.baseUrl.replace(/\/$/, '')}/webhook`
     const res = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'admintoken': config.adminToken,
+        'token': instanceToken,
       },
       body: JSON.stringify({
         enabled: true,
         url: webhookUrl,
-        webhook_by_events: false,
         events: [
-          "MESSAGES_UPSERT",
-          "MESSAGES_UPDATE",
-          "MESSAGES_DELETE",
-          "SEND_MESSAGE",
-          "CONNECTION_UPDATE",
-          "PRESENCE_UPDATE",
-          "QRCODE_UPDATED",
-          "CALL_UPSERT",
+          'connection',
+          'messages',
+          'messages_update',
+          'history',
+          'chats',
+          'contacts',
+          'groups',
+          'presence',
+          'call',
         ],
       }),
     })
     return res.json()
   },
 
-  async setSettings(config: UazApiConfig, instanceName: string) {
-    const url = `${config.baseUrl.replace(/\/$/, '')}/settings/set/${instanceName}`
+  async logoutInstance(config: UazApiConfig, instanceToken: string) {
+    const url = `${config.baseUrl.replace(/\/$/, '')}/instance/logout`
     const res = await fetch(url, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'admintoken': config.adminToken,
-      },
-      body: JSON.stringify({
-        rejectCall: false,
-        groupsIgnore: false,
-        alwaysOnline: false,
-        readMessages: true,
-        readStatus: true,
-        syncFullHistory: false,
-      }),
-    })
-    return res.json()
-  },
-
-  async logoutInstance(config: UazApiConfig, instanceName: string) {
-    const url = `${config.baseUrl.replace(/\/$/, '')}/instance/logout/${instanceName}`
-    const res = await fetch(url, {
-      method: 'DELETE',
-      headers: {
-        'admintoken': config.adminToken,
+        'token': instanceToken,
       },
     })
     return res.json()
   },
 
-  async deleteInstance(config: UazApiConfig, instanceName: string) {
-    const url = `${config.baseUrl.replace(/\/$/, '')}/instance/delete/${instanceName}`
+  async deleteInstance(config: UazApiConfig, instanceToken: string) {
+    const url = `${config.baseUrl.replace(/\/$/, '')}/instance`
     const res = await fetch(url, {
       method: 'DELETE',
       headers: {
-        'admintoken': config.adminToken,
+        'token': instanceToken,
       },
     })
     return res.json()
@@ -101,46 +88,39 @@ export const uazapi = {
     return res.json()
   },
 
-  async getConnectionState(config: UazApiConfig, instanceName: string) {
-    const url = `${config.baseUrl.replace(/\/$/, '')}/instance/connectionState/${instanceName}`
+  async getConnectionState(config: UazApiConfig, instanceToken: string) {
+    const url = `${config.baseUrl.replace(/\/$/, '')}/instance/status`
     const res = await fetch(url, {
       method: 'GET',
       headers: {
-        'admintoken': config.adminToken,
+        'token': instanceToken,
       },
     })
     return res.json()
   },
 
-  async getQrCode(config: UazApiConfig, instanceName: string) {
-    const url = `${config.baseUrl.replace(/\/$/, '')}/instance/connect/${instanceName}`
+  async getQrCode(config: UazApiConfig, instanceToken: string) {
+    const url = `${config.baseUrl.replace(/\/$/, '')}/instance/connect`
     const res = await fetch(url, {
-      method: 'GET',
+      method: 'POST',
       headers: {
-        'admintoken': config.adminToken,
+        'token': instanceToken,
       },
     })
     return res.json()
   },
 
-  async sendText(config: UazApiConfig, instanceName: string, number: string, text: string) {
-    const url = `${config.baseUrl.replace(/\/$/, '')}/message/sendText/${instanceName}`
+  async sendText(config: UazApiConfig, instanceToken: string, number: string, text: string) {
+    const url = `${config.baseUrl.replace(/\/$/, '')}/message/sendText`
     const res = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'admintoken': config.adminToken,
+        'token': instanceToken,
       },
       body: JSON.stringify({
         number,
-        options: {
-          delay: 1200,
-          presence: "composing",
-          linkPreview: false,
-        },
-        textMessage: {
-          text,
-        },
+        text,
       }),
     })
     return res.json()
