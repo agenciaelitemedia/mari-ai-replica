@@ -1,0 +1,1 @@
+ALTER TABLE public.queues ADD COLUMN IF NOT EXISTS phone_resolved_at timestamptz;

@@ -41,7 +41,7 @@ export function useQueues(includeDeleted = false) {
     queryKey: ['queues', includeDeleted],
     queryFn: async () => {
       const r = await list({ data: { include_deleted: includeDeleted } })
-      return (r.queues ?? []) as Queue[]
+      return (r.queues ?? []) as unknown as Queue[]
     },
   })
 }

@@ -1084,6 +1084,7 @@ export type Database = {
           metadata: Json | null
           name: string
           phone_number: string | null
+          phone_resolved_at: string | null
           provider_id: string | null
           settings: Json | null
           updated_at: string
@@ -1106,6 +1107,7 @@ export type Database = {
           metadata?: Json | null
           name: string
           phone_number?: string | null
+          phone_resolved_at?: string | null
           provider_id?: string | null
           settings?: Json | null
           updated_at?: string
@@ -1128,6 +1130,7 @@ export type Database = {
           metadata?: Json | null
           name?: string
           phone_number?: string | null
+          phone_resolved_at?: string | null
           provider_id?: string | null
           settings?: Json | null
           updated_at?: string
