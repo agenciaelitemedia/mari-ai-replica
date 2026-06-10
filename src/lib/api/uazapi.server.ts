@@ -10,7 +10,7 @@ export const uazapi = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'admintoken': config.adminToken,
+        'apikey': config.adminToken,
       },
       body: JSON.stringify({
         instanceName,
@@ -27,7 +27,7 @@ export const uazapi = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'admintoken': config.adminToken,
+        'apikey': config.adminToken,
       },
       body: JSON.stringify({
         enabled: true,
@@ -54,7 +54,7 @@ export const uazapi = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'admintoken': config.adminToken,
+        'apikey': config.adminToken,
       },
       body: JSON.stringify({
         rejectCall: false,
@@ -73,7 +73,7 @@ export const uazapi = {
     const res = await fetch(url, {
       method: 'DELETE',
       headers: {
-        'admintoken': config.adminToken,
+        'apikey': config.adminToken,
       },
     })
     return res.json()
@@ -84,7 +84,7 @@ export const uazapi = {
     const res = await fetch(url, {
       method: 'DELETE',
       headers: {
-        'admintoken': config.adminToken,
+        'apikey': config.adminToken,
       },
     })
     return res.json()
@@ -95,7 +95,7 @@ export const uazapi = {
     const res = await fetch(url, {
       method: 'GET',
       headers: {
-        'admintoken': config.adminToken,
+        'apikey': config.adminToken,
       },
     })
     return res.json()
@@ -106,7 +106,7 @@ export const uazapi = {
     const res = await fetch(url, {
       method: 'GET',
       headers: {
-        'admintoken': config.adminToken,
+        'apikey': config.adminToken,
       },
     })
     return res.json()
@@ -117,7 +117,7 @@ export const uazapi = {
     const res = await fetch(url, {
       method: 'GET',
       headers: {
-        'admintoken': config.adminToken,
+        'apikey': config.adminToken,
       },
     })
     return res.json()
@@ -129,7 +129,7 @@ export const uazapi = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'admintoken': config.adminToken,
+        'apikey': config.adminToken,
       },
       body: JSON.stringify({
         number,
