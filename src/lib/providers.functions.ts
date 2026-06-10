@@ -118,11 +118,13 @@ export const testProvider = createServerFn({ method: 'POST' })
 
     try {
       if (p.provider_type === 'uazapi') {
-        const r = await fetch(`${(p.evo_url ?? '').replace(/\/$/, '')}/instance/all`, {
-          headers: { admintoken: p.evo_apikey ?? '' },
-        })
-        return { ok: r.ok, status: r.status, body: await r.text().catch(() => '') }
+        const config = { baseUrl: p.evo_url ?? '', adminToken: p.evo_apikey ?? '' }
+        const data = await uazapi.fetchInstances(config)
+        // Check if data is an array or has the expected shape
+        const ok = Array.isArray(data) || !!data
+        return { ok, status: 200, body: JSON.stringify(data) }
       }
+
       if (p.provider_type === 'waba') {
         const r = await fetch(`https://graph.facebook.com/v20.0/${p.waba_business_id}`, {
           headers: { Authorization: `Bearer ${p.waba_token}` },
