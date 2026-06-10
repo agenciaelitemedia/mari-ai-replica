@@ -268,23 +268,23 @@ export const createQueueFull = createServerFn({ method: 'POST' })
         console.log(`[createQueueFull] Create result for ${row.evo_instance}:`, JSON.stringify(createResult))
         
         // Verifica se houve erro na resposta da API
-        if (!createResult || createResult.error || (createResult.status && createResult.status !== 201 && createResult.status !== 200)) {
+        // UaZapi retorna o token da instância se criado com sucesso
+        const instanceToken = createResult?.token || createResult?.instanceToken || createResult?.response?.token
+        
+        if (!createResult || createResult.error || !instanceToken) {
            // Se falhou a criação na API externa, removemos o registro da fila recém criado no banco
            await supabaseAdmin.from('queues').delete().eq('id', row.id)
-           const errorMsg = createResult?.message || createResult?.error || 'Erro desconhecido na API UaZapi'
+           const errorMsg = createResult?.message || createResult?.error || 'Erro desconhecido na API UaZapi (Token não retornado)'
            throw new Error(`Falha ao criar instância na UaZapi: ${errorMsg}`)
         }
 
-        // 2. Set Settings
-        await uazapi.setSettings(config, row.evo_instance)
-
-        // 3. Set Webhook
+        // 2. Set Webhook
         const request = getRequest()
         const origin = new URL(request.url).origin
         const webhookUrl = `${origin}/api/public/webhooks/uazapi?queue_id=${row.id}&token=${row.evo_apikey}`
         
         console.log(`[createQueueFull] Setting UaZapi webhook: ${webhookUrl}`)
-        await uazapi.setWebhook(config, row.evo_instance, webhookUrl)
+        await uazapi.setWebhook(config, instanceToken, webhookUrl)
       } catch (e: any) {
         // Se houver qualquer erro no processo de configuração externa, removemos a fila para garantir o "tudo ou nada"
         await supabaseAdmin.from('queues').delete().eq('id', row.id)
