@@ -410,7 +410,7 @@ export const deleteQueueFull = createServerFn({ method: 'POST' })
         
         let adminToken = q.evo_apikey // Default to stored token (if it's still the admin one)
         
-        // If we have a provider, fetch the real admin token to be sure
+        // Fetch the real admin token from the provider
         if (q.provider_id) {
           const { data: prov } = await supabaseAdmin
             .from('queue_providers')
@@ -421,8 +421,28 @@ export const deleteQueueFull = createServerFn({ method: 'POST' })
         }
 
         const config = { baseUrl: q.evo_url, adminToken }
-        const deleteResult = await uazapi.deleteInstance(config, q.evo_apikey) // q.evo_apikey is the instance token now
-        console.log(`[deleteQueueFull] UaZapi delete result:`, JSON.stringify(deleteResult))
+        
+        // Try delete with current token (should be the instance token)
+        let deleteResult = await uazapi.deleteInstance(config, q.evo_apikey)
+        console.log(`[deleteQueueFull] UaZapi delete attempt 1 result:`, JSON.stringify(deleteResult))
+
+        // If failed (e.g. 401), try finding the real token by listing all instances
+        if (deleteResult.code === 401 || !deleteResult.success) {
+          console.log(`[deleteQueueFull] Delete failed, searching for instance token by name...`)
+          const allInstances = await uazapi.listAllInstances(config)
+          const instancesArr = Array.isArray(allInstances) ? allInstances : (allInstances?.instances ?? [])
+          const match = instancesArr.find((i: any) => 
+            i.name === q.evo_instance || i.instanceName === q.evo_instance || i.instance === q.evo_instance
+          )
+          
+          if (match?.token) {
+            console.log(`[deleteQueueFull] Found real token for ${q.evo_instance}, retrying delete...`)
+            deleteResult = await uazapi.deleteInstance(config, match.token)
+            console.log(`[deleteQueueFull] UaZapi delete attempt 2 result:`, JSON.stringify(deleteResult))
+          } else if (!match) {
+             console.log(`[deleteQueueFull] Instance not found on server, assuming already deleted.`)
+          }
+        }
       } catch (e) {
         console.error('[deleteQueueFull] Failed to delete UaZapi instance:', e)
       }
