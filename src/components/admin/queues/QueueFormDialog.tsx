@@ -66,7 +66,7 @@ export function QueueFormDialog({ open, onOpenChange, queue }: Props) {
           {queue.channel_type === 'uazapi' && (
             <div className="space-y-2">
               <Label>Instância UaZapi</Label>
-              <Input value={evoInstance} onChange={(e) => setEvoInstance(e.target.value)} placeholder="QUEUE_..." />
+              <Input value={evoInstance} onChange={(e) => setEvoInstance(e.target.value)} placeholder="QMarIA_..." />
             </div>
           )}
 
