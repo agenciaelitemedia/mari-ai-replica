@@ -407,13 +407,24 @@ export const deleteQueueFull = createServerFn({ method: 'POST' })
     if (q.channel_type === 'uazapi' && q.evo_instance && q.evo_url && q.evo_apikey) {
       try {
         console.log(`[deleteQueueFull] Deleting UaZapi instance: ${q.evo_instance}`)
-        const config = { baseUrl: q.evo_url, adminToken: q.evo_apikey }
-        const deleteResult = await uazapi.deleteInstance(config, q.evo_instance)
+        
+        let adminToken = q.evo_apikey // Default to stored token (if it's still the admin one)
+        
+        // If we have a provider, fetch the real admin token to be sure
+        if (q.provider_id) {
+          const { data: prov } = await supabaseAdmin
+            .from('queue_providers')
+            .select('evo_apikey')
+            .eq('id', q.provider_id)
+            .maybeSingle()
+          if (prov?.evo_apikey) adminToken = prov.evo_apikey
+        }
+
+        const config = { baseUrl: q.evo_url, adminToken }
+        const deleteResult = await uazapi.deleteInstance(config, q.evo_apikey) // q.evo_apikey is the instance token now
         console.log(`[deleteQueueFull] UaZapi delete result:`, JSON.stringify(deleteResult))
       } catch (e) {
         console.error('[deleteQueueFull] Failed to delete UaZapi instance:', e)
-        // We don't throw here to avoid blocking the queue deletion in our system
-        // but it's good to have it logged.
       }
     }
 
