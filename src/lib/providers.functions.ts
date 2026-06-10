@@ -175,6 +175,12 @@ export const getUazapiQrCode = createServerFn({ method: 'GET' })
 
     const config = { baseUrl: q.evo_url, adminToken: '' }
     const result = await uazapi.getQrCode(config, q.evo_apikey)
+    
+    // Normalize response: if result is a raw data URL string, wrap it
+    if (typeof result === 'string' && result.startsWith('data:image')) {
+      return { base64: result }
+    }
+    
     return result
   })
 
