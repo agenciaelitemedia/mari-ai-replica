@@ -17,6 +17,7 @@ export const uazapi = {
         'admintoken': config.adminToken,
       },
       body: JSON.stringify({
+        instanceName: instanceName,
         name: instanceName,
       }),
     })
