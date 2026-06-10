@@ -90,16 +90,6 @@ export const uazapi = {
     return res.json()
   },
 
-  async fetchInstances(config: UazApiConfig) {
-    const url = `${config.baseUrl.replace(/\/$/, '')}/instance/all`
-    const res = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'admintoken': config.adminToken,
-      },
-    })
-    return res.json()
-  },
 
   async getConnectionState(config: UazApiConfig, instanceToken: string) {
     const url = `${config.baseUrl.replace(/\/$/, '')}/instance/status`
