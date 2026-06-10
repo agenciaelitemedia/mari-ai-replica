@@ -14,21 +14,7 @@ export const Route = createFileRoute('/_authenticated/configuracoes')({
 })
 
 function SettingsPage() {
-  const { isSuperAdmin, profile } = useAuth()
-  const defaultClientId = profile?.client_id ?? null
-
   const { providers } = useProvidersAdmin()
-  const { queues, isLoading: loadingQ, clients, save: saveQ, isSaving: savingQ, remove: removeQ } = useQueuesAdmin()
-
-  const clientsById = useMemo(() => Object.fromEntries(clients.map((c) => [c.id, c.name])), [clients])
-
-  const [queueOpen, setQueueOpen] = useState(false)
-  const [editingQ, setEditingQ] = useState<any | null>(null)
-
-  const handleDeleteQ = async (id: string) => {
-    const ok = await confirmDelete({ title: 'Excluir fila?', text: 'Esta ação não pode ser desfeita.' })
-    if (ok) removeQ(id)
-  }
 
   const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID
   const base = `https://project--${projectId}.lovable.app/api/public/webhooks`
@@ -57,28 +43,11 @@ function SettingsPage() {
         </TabsContent>
 
         <TabsContent value="queues" className="space-y-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle>Filas de atendimento</CardTitle>
-                <CardDescription>Vinculadas a um provedor e liberadas por cliente</CardDescription>
-              </div>
-              <Button onClick={() => { setEditingQ(null); setQueueOpen(true) }}>
-                <Plus className="h-4 w-4 mr-1" /> Nova fila
-              </Button>
-            </CardHeader>
-            <CardContent>
-              {loadingQ ? (
-                <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary h-8 w-8" /></div>
-              ) : (
-                <QueuesList queues={queues} onEdit={(q) => { setEditingQ(q); setQueueOpen(true) }} onDelete={handleDeleteQ} />
-              )}
-            </CardContent>
-          </Card>
+          <QueuesPanel />
         </TabsContent>
 
         <TabsContent value="webhooks" className="space-y-4">
-          {providers.map((p) => {
+          {providers.map((p: any) => {
             const url =
               p.provider_type === 'uazapi' ? `${base}/uazapi?queue_id=<ID_DA_FILA>&token=${p.evo_apikey ?? ''}` :
               p.provider_type === 'waba' ? `${base}/waba?provider_id=${p.id}` :
@@ -107,16 +76,6 @@ function SettingsPage() {
           )}
         </TabsContent>
       </Tabs>
-
-      <QueueDialog
-        open={queueOpen}
-        onClose={() => setQueueOpen(false)}
-        queue={editingQ}
-        providers={providers}
-        onSave={(data) => saveQ(data, { onSuccess: () => setQueueOpen(false) } as any)}
-        isSaving={savingQ}
-      />
     </div>
   )
 }
-
