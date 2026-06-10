@@ -34,10 +34,12 @@ export function UazapiConnectDialog({ open, onOpenChange, queueId, queueName }: 
       ])
 
       setStatus(statRes)
-      if (qrRes?.base64) {
-        setQrCode(qrRes.base64)
-      } else if (qrRes?.qrcode) {
-        setQrCode(qrRes.qrcode)
+      
+      // Look for QR in various possible positions
+      const qrBase64 = qrRes?.base64 || qrRes?.qrcode || qrRes?.response?.qrcode || qrRes?.response?.base64
+      
+      if (qrBase64) {
+        setQrCode(qrBase64.startsWith('data:image') ? qrBase64 : `data:image/png;base64,${qrBase64}`)
       } else {
         setQrCode(null)
       }

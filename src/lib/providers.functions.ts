@@ -176,10 +176,18 @@ export const getUazapiQrCode = createServerFn({ method: 'GET' })
 
     const config = { baseUrl: q.evo_url, adminToken: '' }
     const result = await uazapi.getQrCode(config, q.evo_apikey)
+    console.log(`[getUazapiQrCode] API Result:`, JSON.stringify(result))
     
     // Normalize response: if result is a raw data URL string, wrap it
     if (typeof result === 'string' && result.startsWith('data:image')) {
       return { base64: result }
+    }
+    
+    // UaZapi v2 usually returns { base64: "..." } or { qrcode: "..." }
+    // but sometimes it's inside response: { qrcode: "..." }
+    const qrData = result?.base64 || result?.qrcode || result?.response?.qrcode || result?.response?.base64
+    if (qrData) {
+       return { base64: qrData.startsWith('data:image') ? qrData : `data:image/png;base64,${qrData}` }
     }
     
     return result
