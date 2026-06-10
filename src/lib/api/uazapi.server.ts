@@ -91,7 +91,7 @@ export const uazapi = {
   },
 
   async fetchInstances(config: UazApiConfig) {
-    const url = `${config.baseUrl.replace(/\/$/, '')}/instance/fetchInstances`
+    const url = `${config.baseUrl.replace(/\/$/, '')}/instance/all`
     const res = await fetch(url, {
       method: 'GET',
       headers: {
