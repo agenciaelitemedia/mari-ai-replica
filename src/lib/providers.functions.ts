@@ -266,12 +266,13 @@ export const createQueueFull = createServerFn({ method: 'POST' })
         console.log(`[createQueueFull] Creating UaZapi instance: ${row.evo_instance}`)
         const createResult = await uazapi.createInstance(config, row.evo_instance)
         console.log(`[createQueueFull] Create result for ${row.evo_instance}:`, JSON.stringify(createResult))
-
-        // No UaZapi/Evolution, se a criação falhar ou retornar erro, devemos abortar para manter a consistência
-        if (createResult?.error || (createResult?.status && createResult.status !== 201 && createResult.status !== 200)) {
+        
+        // Verifica se houve erro na resposta da API
+        if (!createResult || createResult.error || (createResult.status && createResult.status !== 201 && createResult.status !== 200)) {
            // Se falhou a criação na API externa, removemos o registro da fila recém criado no banco
            await supabaseAdmin.from('queues').delete().eq('id', row.id)
-           throw new Error(`Falha ao criar instância na UaZapi: ${createResult?.message || 'Erro desconhecido'}`)
+           const errorMsg = createResult?.message || createResult?.error || 'Erro desconhecido na API UaZapi'
+           throw new Error(`Falha ao criar instância na UaZapi: ${errorMsg}`)
         }
 
         // 2. Set Settings
