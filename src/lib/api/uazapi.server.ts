@@ -93,24 +93,38 @@ export const uazapi = {
 
   async getConnectionState(config: UazApiConfig, instanceToken: string) {
     const url = `${config.baseUrl.replace(/\/$/, '')}/instance/status`
-    const res = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'token': instanceToken,
-      },
-    })
-    return res.json()
+    try {
+      const res = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'token': instanceToken,
+        },
+      })
+      const data = await res.json()
+      console.log(`[uazapi] getConnectionState status: ${res.status}`, JSON.stringify(data))
+      return data
+    } catch (error) {
+      console.error('[uazapi] getConnectionState error:', error)
+      throw error
+    }
   },
 
   async getQrCode(config: UazApiConfig, instanceToken: string) {
     const url = `${config.baseUrl.replace(/\/$/, '')}/instance/connect`
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'token': instanceToken,
-      },
-    })
-    return res.json()
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'token': instanceToken,
+        },
+      })
+      const data = await res.json()
+      console.log(`[uazapi] getQrCode status: ${res.status}`, JSON.stringify(data))
+      return data
+    } catch (error) {
+      console.error('[uazapi] getQrCode error:', error)
+      throw error
+    }
   },
 
   async sendText(config: UazApiConfig, instanceToken: string, number: string, text: string) {
