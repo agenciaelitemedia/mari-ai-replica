@@ -6,19 +6,42 @@ import { providerSchema, generateRandomKey, type ProviderType } from './provider
 async function getUserClientId(supabase: any, userId: string): Promise<string | null> {
   const { data: profile } = await supabase.from('profiles').select('client_id, email').eq('id', userId).maybeSingle()
   if (profile?.client_id) return profile.client_id
-
-  // Fallback: search client by email if profile client_id is missing
   if (profile?.email) {
     const { data: client } = await supabase.from('clients').select('id').eq('email', profile.email).maybeSingle()
     if (client) return client.id
   }
-
   return null
 }
 
 async function isSuperAdmin(supabase: any, userId: string) {
   const { data } = await supabase.from('user_roles').select('role').eq('user_id', userId)
   return (data ?? []).some((r: any) => r.role === 'superadmin')
+}
+
+async function resolveClientLimit(supabaseAdmin: any, clientId: string): Promise<number> {
+  const { data: client } = await supabaseAdmin
+    .from('clients')
+    .select('settings, plan_id')
+    .eq('id', clientId)
+    .maybeSingle()
+
+  // 1. Client override
+  if (client?.settings && typeof client.settings === 'object') {
+    const v = Number((client.settings as any).queues_count || (client.settings as any).QUEUE_LIMIT || 0)
+    if (v > 0) return v
+  }
+  // 2. Plan
+  if (client?.plan_id) {
+    const { data: plan } = await supabaseAdmin
+      .from('plans')
+      .select('settings')
+      .eq('id', client.plan_id)
+      .maybeSingle()
+    const v = Number((plan?.settings as any)?.queues_count ?? 0)
+    if (v > 0) return v
+  }
+  // 3. Default (igual appjulia)
+  return 1
 }
 
 export const listProviders = createServerFn({ method: 'GET' })
@@ -82,7 +105,6 @@ export const deleteProvider = createServerFn({ method: 'POST' })
     return { ok: true }
   })
 
-
 export const testProvider = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { id: string }) => z.object({ id: z.string().uuid() }).parse(input))
@@ -122,18 +144,38 @@ export const testProvider = createServerFn({ method: 'POST' })
 
 // ============ Queues ============
 
-const queueSchema = z.object({
-  id: z.string().uuid().optional(),
-  provider_id: z.string().uuid(),
+const createQueueSchema = z.object({
   name: z.string().min(1).max(120),
-  phone_number: z.string().optional(),
+  channel_type: z.enum(['uazapi', 'waba', 'instagram', 'webchat']),
+  provider_id: z.string().uuid().nullable().optional(),
+  evo_instance: z.string().nullable().optional(),
+  // WABA per-queue credentials
+  waba_token: z.string().nullable().optional(),
+  waba_id: z.string().nullable().optional(),
+  waba_number_id: z.string().nullable().optional(),
+  phone_number: z.string().nullable().optional(),
   settings: z.record(z.any()).optional(),
   is_active: z.boolean().default(true),
 })
 
+const updateQueueSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().min(1).max(120).optional(),
+  evo_instance: z.string().nullable().optional(),
+  waba_token: z.string().nullable().optional(),
+  waba_id: z.string().nullable().optional(),
+  waba_number_id: z.string().nullable().optional(),
+  phone_number: z.string().nullable().optional(),
+  settings: z.record(z.any()).optional(),
+  is_active: z.boolean().optional(),
+})
+
 export const listQueuesFull = createServerFn({ method: 'GET' })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
+  .inputValidator((input: { include_deleted?: boolean } | undefined) =>
+    z.object({ include_deleted: z.boolean().optional() }).parse(input ?? {}),
+  )
+  .handler(async ({ data, context }) => {
     const { supabase, userId } = context
     const superadmin = await isSuperAdmin(supabase, userId)
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
@@ -141,8 +183,9 @@ export const listQueuesFull = createServerFn({ method: 'GET' })
     let q = supabaseAdmin
       .from('queues')
       .select('*, provider:queue_providers(id, name, provider_type, is_active)')
-      .eq('is_deleted', false)
       .order('created_at', { ascending: false })
+
+    if (!data.include_deleted) q = q.eq('is_deleted', false)
 
     if (!superadmin) {
       const cid = await getUserClientId(supabase, userId)
@@ -154,102 +197,210 @@ export const listQueuesFull = createServerFn({ method: 'GET' })
     return { queues: rows ?? [] }
   })
 
-export const upsertQueueFull = createServerFn({ method: 'POST' })
+export const createQueueFull = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => queueSchema.parse(input))
+  .inputValidator((input: unknown) => createQueueSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context
     const clientId = await getUserClientId(supabase, userId)
     if (!clientId) throw new Error('Usuário sem cliente associado')
-
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
 
-    // Load provider for snapshot + channel_type
-    const { data: prov } = await supabaseAdmin
-      .from('queue_providers')
-      .select('*')
-      .eq('id', data.provider_id)
-      .maybeSingle()
-    if (!prov) throw new Error('Provedor não encontrado')
-    if (!prov.is_active) throw new Error('Provedor está inativo')
+    // Limit enforcement (default 1)
+    const limit = await resolveClientLimit(supabaseAdmin, clientId)
+    const { count } = await supabaseAdmin
+      .from('queues')
+      .select('id', { count: 'exact', head: true })
+      .eq('client_id', clientId)
+      .eq('is_deleted', false)
+    if ((count ?? 0) >= limit) {
+      throw new Error(`Limite de filas atingido (${limit}). Contrate filas adicionais para criar mais.`)
+    }
 
-    // Plan limit check on create
-    if (!data.id) {
-      const { data: client } = await supabaseAdmin
-        .from('clients')
-        .select('settings, plan_id')
-        .eq('id', clientId)
+    // Snapshot provider credentials when present (non-WABA)
+    let snapshot: Record<string, any> = {}
+    if (data.provider_id) {
+      const { data: prov } = await supabaseAdmin
+        .from('queue_providers')
+        .select('*')
+        .eq('id', data.provider_id)
         .maybeSingle()
-      
-      let limit = 0
-      // 1. Check client.settings (override)
-      if (client?.settings && typeof client.settings === 'object') {
-        limit = Number((client.settings as any).queues_count || 0)
-      }
-
-      // 2. Check plan.settings if no client override
-      if (limit === 0 && client?.plan_id) {
-        const { data: plan } = await supabaseAdmin
-          .from('plans')
-          .select('settings')
-          .eq('id', client.plan_id)
-          .maybeSingle()
-        limit = Number((plan?.settings as any)?.queues_count ?? 0)
-      }
-
-      if (limit > 0) {
-        const { count } = await supabaseAdmin
-          .from('queues')
-          .select('id', { count: 'exact', head: true })
-          .eq('client_id', clientId)
-          .eq('is_deleted', false)
-        if ((count ?? 0) >= limit) {
-          throw new Error(`Limite do plano atingido (${limit} fila(s))`)
-        }
+      if (!prov) throw new Error('Provedor não encontrado')
+      if (!prov.is_active) throw new Error('Provedor está inativo')
+      snapshot = {
+        evo_url: prov.evo_url,
+        evo_apikey: prov.evo_apikey,
+        metadata: { provider_snapshot: { type: prov.provider_type, name: prov.name } },
       }
     }
 
     const payload: any = {
       client_id: clientId,
-      provider_id: data.provider_id,
+      provider_id: data.provider_id ?? null,
       name: data.name,
+      channel_type: data.channel_type,
+      evo_instance: data.evo_instance ?? null,
+      waba_token: data.waba_token ?? null,
+      waba_id: data.waba_id ?? null,
+      waba_number_id: data.waba_number_id ?? null,
       phone_number: data.phone_number ?? null,
-      channel_type: prov.provider_type,
-      evo_url: prov.evo_url,
-      evo_apikey: prov.evo_apikey,
-      waba_id: prov.waba_business_id,
-      waba_token: prov.waba_token,
       is_active: data.is_active,
       settings: data.settings ?? {},
-      metadata: { provider_snapshot: { type: prov.provider_type, name: prov.name } },
+      ...snapshot,
     }
 
-    if (data.id) payload.id = data.id
-
-    const { data: row, error } = await supabaseAdmin.from('queues').upsert(payload).select('*').single()
+    const { data: row, error } = await supabaseAdmin.from('queues').insert(payload).select('*').single()
     if (error) throw new Error(error.message)
     return { queue: row }
   })
 
-
-export const deleteQueueFull = createServerFn({ method: 'POST' })
+export const updateQueueFull = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { id: string }) => z.object({ id: z.string().uuid() }).parse(input))
+  .inputValidator((input: unknown) => updateQueueSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context
     const superadmin = await isSuperAdmin(supabase, userId)
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
-    const { data: q } = await supabaseAdmin.from('queues').select('client_id').eq('id', data.id).maybeSingle()
+
+    const { data: existing } = await supabaseAdmin
+      .from('queues')
+      .select('client_id')
+      .eq('id', data.id)
+      .maybeSingle()
+    if (!existing) throw new Error('Fila não encontrada')
+    if (!superadmin) {
+      const cid = await getUserClientId(supabase, userId)
+      if (cid !== existing.client_id) throw new Error('Sem permissão')
+    }
+
+    const { id, ...fields } = data
+    const payload: Record<string, any> = {}
+    for (const [k, v] of Object.entries(fields)) {
+      if (v !== undefined) payload[k] = v
+    }
+
+    const { data: row, error } = await supabaseAdmin
+      .from('queues')
+      .update(payload as any)
+      .eq('id', id)
+      .select('*')
+      .single()
+    if (error) throw new Error(error.message)
+    return { queue: row }
+  })
+
+export const countActiveConversations = createServerFn({ method: 'GET' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { queue_id: string }) =>
+    z.object({ queue_id: z.string().uuid() }).parse(input),
+  )
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+    const { count } = await supabaseAdmin
+      .from('chat_conversations')
+      .select('id', { count: 'exact', head: true })
+      .eq('queue_id', data.queue_id)
+      .not('status', 'in', '(resolved,closed)')
+    return { count: count ?? 0 }
+  })
+
+export const deleteQueueFull = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({
+      queue_id: z.string().uuid(),
+      migrate_to_queue_id: z.string().uuid().optional(),
+      force: z.boolean().optional(),
+    }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context
+    const superadmin = await isSuperAdmin(supabase, userId)
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+
+    const { data: q } = await supabaseAdmin.from('queues').select('client_id').eq('id', data.queue_id).maybeSingle()
     if (!q) throw new Error('Fila não encontrada')
     if (!superadmin) {
       const cid = await getUserClientId(supabase, userId)
       if (cid !== q.client_id) throw new Error('Sem permissão')
     }
+
+    // Count active conversations
+    const { count: activeCount } = await supabaseAdmin
+      .from('chat_conversations')
+      .select('id', { count: 'exact', head: true })
+      .eq('queue_id', data.queue_id)
+      .not('status', 'in', '(resolved,closed)')
+
+    const hasActive = (activeCount ?? 0) > 0
+
+    if (hasActive && !data.migrate_to_queue_id && !data.force) {
+      throw new Error('Existem conversas ativas nesta fila. Selecione uma fila destino ou marque "Excluir sem migrar".')
+    }
+
+    if (data.migrate_to_queue_id && hasActive) {
+      const { error: mErr } = await supabaseAdmin
+        .from('chat_conversations')
+        .update({ queue_id: data.migrate_to_queue_id })
+        .eq('queue_id', data.queue_id)
+        .not('status', 'in', '(resolved,closed)')
+      if (mErr) throw new Error('Falha ao migrar conversas: ' + mErr.message)
+    }
+
     const { error } = await supabaseAdmin
       .from('queues')
-      .update({ is_deleted: true, deleted_at: new Date().toISOString() })
-      .eq('id', data.id)
+      .update({ is_deleted: true, deleted_at: new Date().toISOString(), is_active: false })
+      .eq('id', data.queue_id)
     if (error) throw new Error(error.message)
+    return { ok: true }
+  })
+
+export const restoreQueueFull = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({
+      queue_id: z.string().uuid(),
+      migrate_to_queue_id: z.string().uuid().optional(),
+    }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context
+    const superadmin = await isSuperAdmin(supabase, userId)
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+
+    const { data: q } = await supabaseAdmin.from('queues').select('client_id').eq('id', data.queue_id).maybeSingle()
+    if (!q) throw new Error('Fila não encontrada')
+    if (!superadmin) {
+      const cid = await getUserClientId(supabase, userId)
+      if (cid !== q.client_id) throw new Error('Sem permissão')
+    }
+
+    // Enforce limit on restore
+    const limit = await resolveClientLimit(supabaseAdmin, q.client_id)
+    const { count } = await supabaseAdmin
+      .from('queues')
+      .select('id', { count: 'exact', head: true })
+      .eq('client_id', q.client_id)
+      .eq('is_deleted', false)
+    if ((count ?? 0) >= limit) {
+      throw new Error(`Limite de filas atingido (${limit}). Exclua uma fila ativa antes de restaurar.`)
+    }
+
+    const { error } = await supabaseAdmin
+      .from('queues')
+      .update({ is_deleted: false, deleted_at: null, is_active: true })
+      .eq('id', data.queue_id)
+    if (error) throw new Error(error.message)
+
+    if (data.migrate_to_queue_id) {
+      const { error: mErr } = await supabaseAdmin
+        .from('chat_conversations')
+        .update({ queue_id: data.queue_id })
+        .eq('queue_id', data.migrate_to_queue_id)
+        .not('status', 'in', '(resolved,closed)')
+      if (mErr) throw new Error('Fila restaurada, mas falha ao migrar conversas: ' + mErr.message)
+    }
+
     return { ok: true }
   })
 
@@ -275,31 +426,11 @@ export const getQueuesUsage = createServerFn({ method: 'GET' })
   .handler(async ({ context }) => {
     const { supabase, userId } = context
     const clientId = await getUserClientId(supabase, userId)
-    if (!clientId) return { current: 0, limit: 0 }
+    if (!clientId) return { current: 0, limit: 1 }
 
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
-    
-    // Get limit
-    const { data: client } = await supabaseAdmin
-      .from('clients')
-      .select('settings, plan_id')
-      .eq('id', clientId)
-      .maybeSingle()
-    
-    let limit = 0
-    if (client?.settings && typeof client.settings === 'object') {
-      limit = Number((client.settings as any).queues_count || 0)
-    }
-    if (limit === 0 && client?.plan_id) {
-      const { data: plan } = await supabaseAdmin
-        .from('plans')
-        .select('settings')
-        .eq('id', client.plan_id)
-        .maybeSingle()
-      limit = Number((plan?.settings as any)?.queues_count ?? 0)
-    }
+    const limit = await resolveClientLimit(supabaseAdmin, clientId)
 
-    // Get current count
     const { count } = await supabaseAdmin
       .from('queues')
       .select('id', { count: 'exact', head: true })

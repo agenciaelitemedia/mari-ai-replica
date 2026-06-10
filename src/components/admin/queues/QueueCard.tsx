@@ -1,71 +1,144 @@
+import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Pencil, Trash2, MessageSquare, Instagram, Globe, MessageCircle } from 'lucide-react'
-import { type ProviderType } from '@/lib/providers.types'
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import {
+  MessageSquare, Phone, Globe, Instagram, MoreVertical, Pencil, Trash2, RotateCcw, Brain,
+} from 'lucide-react'
+import type { Queue } from '@/hooks/useQueues'
+import { useQueueMutations } from '@/hooks/useQueues'
+
+const channelIcons: Record<string, React.ReactNode> = {
+  uazapi: <Phone className="w-4 h-4" />,
+  waba: <MessageSquare className="w-4 h-4" />,
+  webchat: <Globe className="w-4 h-4" />,
+  instagram: <Instagram className="w-4 h-4" />,
+}
+
+const channelBadgeLabels: Record<string, string> = {
+  uazapi: 'UaZapi',
+  waba: 'API Oficial',
+  webchat: 'WebChat',
+  instagram: 'Instagram',
+}
+
+const channelBadgeClass: Record<string, string> = {
+  uazapi: 'border-emerald-500/40 text-emerald-700 dark:text-emerald-300',
+  waba: 'border-blue-500/40 text-blue-700 dark:text-blue-300',
+  webchat: 'border-purple-500/40 text-purple-700 dark:text-purple-300',
+  instagram: 'border-pink-500/40 text-pink-700 dark:text-pink-300',
+}
 
 interface Props {
-  queue: any
-  onEdit: (q: any) => void
-  onDelete: (id: string) => void
+  queue: Queue
+  onEdit: (q: Queue) => void
+  onDelete: (q: Queue) => void
+  onRestore: (q: Queue) => void
 }
 
-const CHANNEL_ICONS: Record<string, any> = {
-  uazapi: MessageCircle,
-  waba: MessageSquare,
-  instagram: Instagram,
-  webchat: Globe,
-}
+export function QueueCard({ queue, onEdit, onDelete, onRestore }: Props) {
+  const { updateQueue } = useQueueMutations()
+  const qs = (queue.settings ?? {}) as Record<string, unknown>
+  const qAutoTranscribe = qs.auto_transcribe_audio === true
+  const qAutoResolve = qs.auto_summary_on_resolve === true
+  const qAutoClose = qs.auto_summary_on_close === true
 
-const CHANNEL_COLORS: Record<string, string> = {
-  uazapi: 'text-green-600 bg-green-50',
-  waba: 'text-blue-600 bg-blue-50',
-  instagram: 'text-pink-600 bg-pink-50',
-  webchat: 'text-purple-600 bg-purple-50',
-}
+  const toggleQueueFlag = (key: string, value: boolean) => {
+    const nextSettings = { ...qs, [key]: value }
+    updateQueue.mutate({ id: queue.id, settings: nextSettings } as never)
+  }
 
-export function QueueCard({ queue, onEdit, onDelete }: Props) {
-  const Icon = CHANNEL_ICONS[queue.channel_type as string] || MessageSquare
-  const colorClass = CHANNEL_COLORS[queue.channel_type as string] || 'text-gray-600 bg-gray-50'
+  const identifierLabel =
+    queue.channel_type === 'uazapi' ? queue.evo_instance
+    : queue.channel_type === 'waba' ? queue.waba_number_id
+    : null
+  const identifierPrefix = queue.channel_type === 'uazapi' ? 'Instância' : 'ID'
 
   return (
-    <Card className="p-4 hover:shadow-md transition-all border-l-4 border-l-primary/20">
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div className={`p-3 rounded-xl ${colorClass}`}>
-            <Icon className="h-6 w-6" />
+    <Card className={`hover:shadow-md transition-shadow ${queue.is_deleted ? 'opacity-60 border-dashed' : ''}`}>
+      <CardContent className="p-4 space-y-3">
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-2 min-w-0">
+            <h3 className="font-semibold text-foreground truncate">{queue.name}</h3>
+            <Badge variant={queue.is_active && !queue.is_deleted ? 'default' : 'secondary'}>
+              {queue.is_deleted ? 'Excluída' : queue.is_active ? 'Ativa' : 'Inativa'}
+            </Badge>
           </div>
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <h3 className="font-bold text-lg leading-tight">{queue.name}</h3>
-              {queue.is_active ? (
-                <Badge className="bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border-none">Ativa</Badge>
-              ) : (
-                <Badge variant="outline" className="text-muted-foreground opacity-60">Inativa</Badge>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {!queue.is_deleted && (
+                <>
+                  <DropdownMenuItem onClick={() => onEdit(queue)}>
+                    <Pencil className="mr-2 h-4 w-4" /> Editar
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onDelete(queue)} className="text-destructive">
+                    <Trash2 className="mr-2 h-4 w-4" /> Excluir
+                  </DropdownMenuItem>
+                </>
               )}
-            </div>
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <span className="font-medium text-foreground/70">Provedor:</span> {queue.provider?.name || 'Não vinculado'}
-              </span>
-              {queue.phone_number && (
-                <span className="flex items-center gap-1">
-                  <span className="font-medium text-foreground/70">ID:</span> {queue.phone_number}
-                </span>
+              {queue.is_deleted && (
+                <DropdownMenuItem onClick={() => onRestore(queue)}>
+                  <RotateCcw className="mr-2 h-4 w-4" /> Restaurar
+                </DropdownMenuItem>
               )}
-            </div>
-          </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={() => onEdit(queue)} className="hover:bg-primary/10 hover:text-primary transition-colors">
-            <Pencil className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="icon" onClick={() => onDelete(queue.id)} className="hover:bg-destructive/10 hover:text-destructive transition-colors text-muted-foreground">
-            <Trash2 className="h-4 w-4" />
-          </Button>
+        <div className="flex flex-wrap items-center gap-2 text-xs">
+          <Badge variant="outline" className={channelBadgeClass[queue.channel_type] ?? ''}>
+            <span className="flex items-center gap-1.5">
+              {channelIcons[queue.channel_type]}
+              {channelBadgeLabels[queue.channel_type] ?? queue.channel_type}
+            </span>
+          </Badge>
+          {queue.provider?.name && (
+            <span className="text-muted-foreground truncate">{queue.provider.name}</span>
+          )}
         </div>
-      </div>
+
+        {identifierLabel && (
+          <div className="text-xs text-muted-foreground truncate">
+            <span className="font-medium text-foreground/70">{identifierPrefix}:</span> {identifierLabel}
+          </div>
+        )}
+        {queue.phone_number && (
+          <div className="text-xs text-muted-foreground">
+            <span className="font-medium text-foreground/70">Telefone:</span> {queue.phone_number}
+          </div>
+        )}
+
+        {!queue.is_deleted && (
+          <div className="pt-3 border-t space-y-2">
+            <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              <Brain className="h-3 w-3" /> Automações
+            </div>
+            <div className="space-y-2">
+              <ToggleRow id={`tr-${queue.id}`} label="Transcrever áudios" checked={qAutoTranscribe} onChange={(v) => toggleQueueFlag('auto_transcribe_audio', v)} />
+              <ToggleRow id={`re-${queue.id}`} label="Resumo ao resolver" checked={qAutoResolve} onChange={(v) => toggleQueueFlag('auto_summary_on_resolve', v)} />
+              <ToggleRow id={`cl-${queue.id}`} label="Resumo ao encerrar" checked={qAutoClose} onChange={(v) => toggleQueueFlag('auto_summary_on_close', v)} />
+            </div>
+          </div>
+        )}
+      </CardContent>
     </Card>
+  )
+}
+
+function ToggleRow({ id, label, checked, onChange }: { id: string; label: string; checked: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <div className="flex items-center justify-between gap-2">
+      <Label htmlFor={id} className="text-xs text-foreground/80 cursor-pointer">{label}</Label>
+      <Switch id={id} checked={checked} onCheckedChange={onChange} />
+    </div>
   )
 }
