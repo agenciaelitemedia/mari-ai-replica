@@ -1,7 +1,10 @@
 import { createServerFn } from '@tanstack/react-start'
+import { getRequest } from '@tanstack/react-start/server'
 import { z } from 'zod'
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware'
 import { providerSchema, generateRandomKey, type ProviderType } from './providers.types'
+import { uazapi } from './api/uazapi.server'
+
 
 async function getUserClientId(supabase: any, userId: string): Promise<string | null> {
   const { data: profile } = await supabase.from('profiles').select('client_id, email').eq('id', userId).maybeSingle()
@@ -115,11 +118,13 @@ export const testProvider = createServerFn({ method: 'POST' })
 
     try {
       if (p.provider_type === 'uazapi') {
-        const r = await fetch(`${(p.evo_url ?? '').replace(/\/$/, '')}/instance/all`, {
-          headers: { admintoken: p.evo_apikey ?? '' },
-        })
-        return { ok: r.ok, status: r.status, body: await r.text().catch(() => '') }
+        const config = { baseUrl: p.evo_url ?? '', adminToken: p.evo_apikey ?? '' }
+        const data = await uazapi.fetchInstances(config)
+        // Check if data is an array or has the expected shape
+        const ok = Array.isArray(data) || !!data
+        return { ok, status: 200, body: JSON.stringify(data) }
       }
+
       if (p.provider_type === 'waba') {
         const r = await fetch(`https://graph.facebook.com/v20.0/${p.waba_business_id}`, {
           headers: { Authorization: `Bearer ${p.waba_token}` },
@@ -234,27 +239,6 @@ export const createQueueFull = createServerFn({ method: 'POST' })
       }
     }
 
-    // If UaZapi, try creating instance automatically
-    if (data.channel_type === 'uazapi' && data.evo_instance && snapshot.evo_url && snapshot.evo_apikey) {
-      try {
-        const baseUrl = snapshot.evo_url.replace(/\/$/, '')
-        await fetch(`${baseUrl}/instance/create`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'admintoken': snapshot.evo_apikey,
-          },
-          body: JSON.stringify({
-            instanceName: data.evo_instance,
-            qrcode: true,
-          }),
-        })
-        // We don't block if create fails (e.g. already exists), but we log it
-      } catch (e) {
-        console.error('[createQueueFull] Failed to auto-create uazapi instance:', e)
-      }
-    }
-
     const payload: any = {
       client_id: clientId,
       provider_id: data.provider_id ?? null,
@@ -272,8 +256,34 @@ export const createQueueFull = createServerFn({ method: 'POST' })
 
     const { data: row, error } = await supabaseAdmin.from('queues').insert(payload).select('*').single()
     if (error) throw new Error(error.message)
+
+    // If UaZapi, try creating instance and configuring automatically
+    if (data.channel_type === 'uazapi' && row.evo_instance && row.evo_url && row.evo_apikey) {
+      try {
+        const config = { baseUrl: row.evo_url, adminToken: row.evo_apikey }
+        
+        // 1. Create Instance
+        console.log(`[createQueueFull] Creating UaZapi instance: ${row.evo_instance}`)
+        await uazapi.createInstance(config, row.evo_instance)
+
+        // 2. Set Settings
+        await uazapi.setSettings(config, row.evo_instance)
+
+        // 3. Set Webhook
+        const request = getRequest()
+        const origin = new URL(request.url).origin
+        const webhookUrl = `${origin}/api/public/webhooks/uazapi?queue_id=${row.id}&token=${row.evo_apikey}`
+        
+        console.log(`[createQueueFull] Setting UaZapi webhook: ${webhookUrl}`)
+        await uazapi.setWebhook(config, row.evo_instance, webhookUrl)
+      } catch (e) {
+        console.error('[createQueueFull] Failed to fully configure uazapi instance:', e)
+      }
+    }
+
     return { queue: row }
   })
+
 
 export const updateQueueFull = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
