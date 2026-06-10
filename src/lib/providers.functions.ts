@@ -149,6 +149,65 @@ export const testProvider = createServerFn({ method: 'POST' })
 
 // ============ Queues ============
 
+export const getUazapiQrCode = createServerFn({ method: 'GET' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { queue_id: string }) =>
+    z.object({ queue_id: z.string().uuid() }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+
+    const { data: q } = await supabaseAdmin
+      .from('queues')
+      .select('evo_url, evo_apikey, client_id')
+      .eq('id', data.queue_id)
+      .maybeSingle()
+    if (!q) throw new Error('Fila não encontrada')
+
+    const superadmin = await isSuperAdmin(supabase, userId)
+    if (!superadmin) {
+      const cid = await getUserClientId(supabase, userId)
+      if (cid !== q.client_id) throw new Error('Sem permissão')
+    }
+
+    if (!q.evo_url || !q.evo_apikey) throw new Error('Configuração UaZapi incompleta')
+
+    const config = { baseUrl: q.evo_url, adminToken: '' }
+    const result = await uazapi.getQrCode(config, q.evo_apikey)
+    return result
+  })
+
+export const getUazapiStatus = createServerFn({ method: 'GET' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { queue_id: string }) =>
+    z.object({ queue_id: z.string().uuid() }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+
+    const { data: q } = await supabaseAdmin
+      .from('queues')
+      .select('evo_url, evo_apikey, client_id')
+      .eq('id', data.queue_id)
+      .maybeSingle()
+    if (!q) throw new Error('Fila não encontrada')
+
+    const superadmin = await isSuperAdmin(supabase, userId)
+    if (!superadmin) {
+      const cid = await getUserClientId(supabase, userId)
+      if (cid !== q.client_id) throw new Error('Sem permissão')
+    }
+
+    if (!q.evo_url || !q.evo_apikey) throw new Error('Configuração UaZapi incompleta')
+
+    const config = { baseUrl: q.evo_url, adminToken: '' }
+    const result = await uazapi.getConnectionState(config, q.evo_apikey)
+    return result
+  })
+
+
 const createQueueSchema = z.object({
   name: z.string().min(1).max(120),
   channel_type: z.enum(['uazapi', 'waba', 'instagram', 'webchat']),

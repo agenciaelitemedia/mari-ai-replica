@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -8,9 +9,12 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import {
   MessageSquare, Phone, Globe, Instagram, MoreVertical, Pencil, Trash2, RotateCcw, Brain,
+  QrCode, ExternalLink,
 } from 'lucide-react'
 import type { Queue } from '@/hooks/useQueues'
 import { useQueueMutations } from '@/hooks/useQueues'
+import { UazapiConnectDialog } from './UazapiConnectDialog'
+
 
 const channelIcons: Record<string, React.ReactNode> = {
   uazapi: <Phone className="w-4 h-4" />,
@@ -41,7 +45,9 @@ interface Props {
 }
 
 export function QueueCard({ queue, onEdit, onDelete, onRestore }: Props) {
+  const [connectOpen, setConnectOpen] = useState(false)
   const { updateQueue } = useQueueMutations()
+
   const qs = (queue.settings ?? {}) as Record<string, unknown>
   const qAutoTranscribe = qs.auto_transcribe_audio === true
   const qAutoResolve = qs.auto_summary_on_resolve === true
@@ -118,21 +124,46 @@ export function QueueCard({ queue, onEdit, onDelete, onRestore }: Props) {
         )}
 
         {!queue.is_deleted && (
-          <div className="pt-3 border-t space-y-2">
-            <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              <Brain className="h-3 w-3" /> Automações
-            </div>
+          <div className="pt-3 border-t space-y-3">
+            {queue.channel_type === 'uazapi' && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full justify-between h-9 border-emerald-500/30 hover:bg-emerald-50 hover:text-emerald-700 transition-colors"
+                onClick={() => setConnectOpen(true)}
+              >
+                <div className="flex items-center gap-2">
+                  <QrCode className="w-4 h-4" />
+                  <span>Conectar WhatsApp</span>
+                </div>
+                <ExternalLink className="w-3 h-3 opacity-50" />
+              </Button>
+            )}
+
             <div className="space-y-2">
-              <ToggleRow id={`tr-${queue.id}`} label="Transcrever áudios" checked={qAutoTranscribe} onChange={(v) => toggleQueueFlag('auto_transcribe_audio', v)} />
-              <ToggleRow id={`re-${queue.id}`} label="Resumo ao resolver" checked={qAutoResolve} onChange={(v) => toggleQueueFlag('auto_summary_on_resolve', v)} />
-              <ToggleRow id={`cl-${queue.id}`} label="Resumo ao encerrar" checked={qAutoClose} onChange={(v) => toggleQueueFlag('auto_summary_on_close', v)} />
+              <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                <Brain className="h-3 w-3" /> Automações
+              </div>
+              <div className="space-y-2">
+                <ToggleRow id={`tr-${queue.id}`} label="Transcrever áudios" checked={qAutoTranscribe} onChange={(v) => toggleQueueFlag('auto_transcribe_audio', v)} />
+                <ToggleRow id={`re-${queue.id}`} label="Resumo ao resolver" checked={qAutoResolve} onChange={(v) => toggleQueueFlag('auto_summary_on_resolve', v)} />
+                <ToggleRow id={`cl-${queue.id}`} label="Resumo ao encerrar" checked={qAutoClose} onChange={(v) => toggleQueueFlag('auto_summary_on_close', v)} />
+              </div>
             </div>
           </div>
         )}
+
+        <UazapiConnectDialog 
+          open={connectOpen} 
+          onOpenChange={setConnectOpen} 
+          queueId={queue.id} 
+          queueName={queue.name}
+        />
       </CardContent>
     </Card>
   )
 }
+
 
 function ToggleRow({ id, label, checked, onChange }: { id: string; label: string; checked: boolean; onChange: (v: boolean) => void }) {
   return (
