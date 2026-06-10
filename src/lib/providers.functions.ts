@@ -267,16 +267,20 @@ export const createQueueFull = createServerFn({ method: 'POST' })
         const createResult = await uazapi.createInstance(config, row.evo_instance)
         console.log(`[createQueueFull] Create result for ${row.evo_instance}:`, JSON.stringify(createResult))
         
-        // Verifica se houve erro na resposta da API
-        // UaZapi retorna o token da instância se criado com sucesso
+        // UaZapi returns instance token on success
         const instanceToken = createResult?.token || createResult?.instanceToken || createResult?.response?.token
         
         if (!createResult || createResult.error || !instanceToken) {
-           // Se falhou a criação na API externa, removemos o registro da fila recém criado no banco
            await supabaseAdmin.from('queues').delete().eq('id', row.id)
-           const errorMsg = createResult?.message || createResult?.error || 'Erro desconhecido na API UaZapi (Token não retornado)'
+           const errorMsg = createResult?.message || createResult?.error || 'Erro na API UaZapi (Token não retornado)'
            throw new Error(`Falha ao criar instância na UaZapi: ${errorMsg}`)
         }
+
+        // Update queue with the real instance token (replacing the admin token)
+        await supabaseAdmin
+          .from('queues')
+          .update({ evo_apikey: instanceToken })
+          .eq('id', row.id);
 
         // 2. Set Webhook
         const request = getRequest()
@@ -286,9 +290,8 @@ export const createQueueFull = createServerFn({ method: 'POST' })
         console.log(`[createQueueFull] Setting UaZapi webhook: ${webhookUrl}`)
         await uazapi.setWebhook(config, instanceToken, webhookUrl)
       } catch (e: any) {
-        // Se houver qualquer erro no processo de configuração externa, removemos a fila para garantir o "tudo ou nada"
         await supabaseAdmin.from('queues').delete().eq('id', row.id)
-        console.error('[createQueueFull] Failed to fully configure uazapi instance, rolling back queue creation:', e)
+        console.error('[createQueueFull] Failed to configure uazapi instance:', e)
         throw new Error(e?.message || 'Erro ao configurar instância externa')
       }
     }
